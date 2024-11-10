@@ -26,3 +26,7 @@ bool ChessPiece::isThereOpponentPiece(Position position) const {
     ChessPiece* p = dynamic_cast<ChessPiece*>(getBoard()->piece(position));
     return (p != nullptr && p->getColor() != color);
 }
+
+ChessPiece* ChessPiece::toChessPiece(Piece* piece) {
+    return dynamic_cast<ChessPiece*>(piece);
+}

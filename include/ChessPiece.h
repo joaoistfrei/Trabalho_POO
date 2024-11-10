@@ -14,6 +14,8 @@ private:
 
 public:
     ChessPiece(Board* board, Color color);
+    virtual ~ChessPiece() = default; // Destrutor virtual default
+
 
     Color getColor() const;
     int getMoveCount() const;
@@ -22,6 +24,8 @@ public:
     ChessPosition getChessPosition() const;
     
     virtual std::string toString() const = 0; // Adicionado o método toString
+
+    static ChessPiece* toChessPiece(Piece* piece);
 
 protected:
     bool isThereOpponentPiece(Position position) const;

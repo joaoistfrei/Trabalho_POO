@@ -4,6 +4,7 @@
 #include "../include/Position.h"
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 Board::Board(int rows, int columns) : rows(rows), columns(columns), pieces(rows, std::vector<Piece*>(columns, nullptr)) {}
 
@@ -52,6 +53,7 @@ Piece* Board::removePiece(Position position) {
         return nullptr;
     }
     Piece* aux = piece(position);
+    //std::cout << "MMMMoved piece type: " << typeid(*aux).name() << std::endl;
     pieces[position.getRow()][position.getColumn()] = nullptr;
     return aux;
 }

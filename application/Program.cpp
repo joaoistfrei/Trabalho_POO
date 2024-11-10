@@ -44,7 +44,7 @@ int main() {
             ChessPosition target = UI::readChessPosition();
 
             ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
-            cout << "TESTEPPPPPPPPPPPPPPPPpp" << endl;
+            cout << "CRAWLLLL" << endl;
             if (capturedPiece != nullptr) {
                 captured.push_back(capturedPiece);
             }

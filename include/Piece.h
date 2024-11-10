@@ -22,6 +22,7 @@ public:
     void setPosition(Position position);
 
     Board* getBoard() const;
+    
     virtual std::vector<std::vector<bool>> possibleMoves() const = 0;
     bool possibleMove(const Position& position) const;
     bool isThereAnyPossibleMove() const;

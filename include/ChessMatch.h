@@ -14,6 +14,7 @@
 #include "Pawn.h"
 #include <vector>
 #include <memory>
+#include <list>
 
 class ChessMatch {
 private:
@@ -24,8 +25,8 @@ private:
     bool checkMate;
     ChessPiece* enPassantVulnerable;
     ChessPiece* promoted;
-    std::vector<std::unique_ptr<Piece>> piecesOnTheBoard;
-    std::vector<std::unique_ptr<Piece>> capturedPieces;
+    std::list<std::unique_ptr<Piece>> piecesOnTheBoard;
+    std::list<std::unique_ptr<Piece>> capturedPieces;
 
     void initialSetup();
     void placeNewPiece(char column, int row, std::unique_ptr<ChessPiece> piece);
@@ -40,6 +41,7 @@ public:
     bool testCheckMate(Color color) const;
     Piece* makeMove(const Position& source, const Position& target);
     void undoMove(const Position& source, const Position& target, Piece* captured);
+    void remove(Piece* piece); // Declaração da função remove
 
     ChessMatch();
 
