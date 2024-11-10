@@ -76,6 +76,7 @@ ChessPosition UI::readChessPosition() {
     if (column < 'a' || column > 'h' || row < 1 || row > 8) {
         throw invalid_argument("Error reading ChessPosition. Valid values are from a1 to h8.");
     }
+    //cout << ChessPosition(column, row).toString() << endl;
     return ChessPosition(column, row);
 }
 

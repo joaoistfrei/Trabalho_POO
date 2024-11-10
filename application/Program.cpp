@@ -33,6 +33,7 @@ int main() {
             cout << endl;
             cout << "Source: ";
             ChessPosition source = UI::readChessPosition();
+            cout << source.toString() << endl;
 
             vector<vector<bool>> possibleMoves = chessMatch->possibleMoves(source);
             UI::clearScreen();
@@ -43,7 +44,7 @@ int main() {
             ChessPosition target = UI::readChessPosition();
 
             ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
-
+            cout << "TESTEPPPPPPPPPPPPPPPPpp" << endl;
             if (capturedPiece != nullptr) {
                 captured.push_back(capturedPiece);
             }

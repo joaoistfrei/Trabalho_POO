@@ -7,6 +7,9 @@
 #include <vector>
 
 class Queen : public ChessPiece {
+private:
+    bool canMove(Position position) const;
+
 public:
     Queen(Board* board, Color color);
     std::string toString() const override; // Adicionado o método toString

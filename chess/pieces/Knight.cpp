@@ -3,7 +3,7 @@
 Knight::Knight(Board* board, Color color) : ChessPiece(board, color) {}
 
 std::string Knight::toString() const {
-    return "G"; // Representação da peça Rook
+    return "N"; // Representação da peça Knight
 }
 
 bool Knight::canMove(Position position) const {
@@ -16,49 +16,49 @@ std::vector<std::vector<bool>> Knight::possibleMoves() const {
     Position p(0, 0);
 
     // cima esquerda
-    p.setValues(position->getRow() - 2, position->getColumn() - 1);
+    p.setValues(getPosition().getRow() - 2, getPosition().getColumn() - 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // cima direita
-    p.setValues(position->getRow() - 2, position->getColumn() + 1);
+    p.setValues(getPosition().getRow() - 2, getPosition().getColumn() + 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // direita cima
-    p.setValues(position->getRow() - 1, position->getColumn() + 2);
+    p.setValues(getPosition().getRow() - 1, getPosition().getColumn() + 2);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // direita baixo
-    p.setValues(position->getRow() + 1, position->getColumn() + 2);
+    p.setValues(getPosition().getRow() + 1, getPosition().getColumn() + 2);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // esquerda cima
-    p.setValues(position->getRow() - 1, position->getColumn() - 2);
+    p.setValues(getPosition().getRow() - 1, getPosition().getColumn() - 2);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // esquerda baixo
-    p.setValues(position->getRow() + 1, position->getColumn() - 2);
-    if (getBoard()->positionExists(p) && canMove(p)) {
-        mat[p.getRow()][p.getColumn()] = true;
-    }
-
-    // baixo direita
-    p.setValues(position->getRow() + 2, position->getColumn() + 1);
+    p.setValues(getPosition().getRow() + 1, getPosition().getColumn() - 2);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // baixo esquerda
-    p.setValues(position->getRow() + 2, position->getColumn() - 1);
+    p.setValues(getPosition().getRow() + 2, getPosition().getColumn() - 1);
+    if (getBoard()->positionExists(p) && canMove(p)) {
+        mat[p.getRow()][p.getColumn()] = true;
+    }
+
+    // baixo direita
+    p.setValues(getPosition().getRow() + 2, getPosition().getColumn() + 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }

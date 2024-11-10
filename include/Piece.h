@@ -18,6 +18,9 @@ public:
     Piece(Board* board);
     virtual ~Piece();
 
+    Position getPosition() const;
+    void setPosition(Position position);
+
     Board* getBoard() const;
     virtual std::vector<std::vector<bool>> possibleMoves() const = 0;
     bool possibleMove(const Position& position) const;

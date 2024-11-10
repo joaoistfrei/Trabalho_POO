@@ -20,6 +20,7 @@ public:
     void increaseMoveCount();
     void decreaseMoveCount();
     ChessPosition getChessPosition() const;
+    
     virtual std::string toString() const = 0; // Adicionado o método toString
 
 protected:

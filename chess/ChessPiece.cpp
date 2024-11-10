@@ -19,7 +19,7 @@ void ChessPiece::decreaseMoveCount() {
 }
 
 ChessPosition ChessPiece::getChessPosition() const {
-    return ChessPosition::fromPosition(*position);
+    return ChessPosition::fromPosition(position);
 }
 
 bool ChessPiece::isThereOpponentPiece(Position position) const {

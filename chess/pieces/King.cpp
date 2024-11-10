@@ -1,8 +1,9 @@
 #include "../../include/King.h"
 #include "../../include/ChessMatch.h"
+#include "../../include/Rook.h"
 
 std::string King::toString() const {
-    return "K"; // Representação da peça Rook
+    return "K"; // Representação da peça King
 }
 
 King::King(Board* board, Color color, ChessMatch* chessMatch) : ChessPiece(board, color), chessMatch(chessMatch) {}
@@ -22,72 +23,72 @@ std::vector<std::vector<bool>> King::possibleMoves() const {
     Position p(0, 0);
 
     // above
-    p.setValues(position->getRow() - 1, position->getColumn());
+    p.setValues(getPosition().getRow() - 1, getPosition().getColumn());
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // below
-    p.setValues(position->getRow() + 1, position->getColumn());
+    p.setValues(getPosition().getRow() + 1, getPosition().getColumn());
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // left
-    p.setValues(position->getRow(), position->getColumn() - 1);
+    p.setValues(getPosition().getRow(), getPosition().getColumn() - 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // right
-    p.setValues(position->getRow(), position->getColumn() + 1);
+    p.setValues(getPosition().getRow(), getPosition().getColumn() + 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // above right
-    p.setValues(position->getRow() - 1, position->getColumn() + 1);
+    p.setValues(getPosition().getRow() - 1, getPosition().getColumn() + 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // above left
-    p.setValues(position->getRow() - 1, position->getColumn() - 1);
+    p.setValues(getPosition().getRow() - 1, getPosition().getColumn() - 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // below right
-    p.setValues(position->getRow() + 1, position->getColumn() + 1);
+    p.setValues(getPosition().getRow() + 1, getPosition().getColumn() + 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
     // below left
-    p.setValues(position->getRow() + 1, position->getColumn() - 1);
+    p.setValues(getPosition().getRow() + 1, getPosition().getColumn() - 1);
     if (getBoard()->positionExists(p) && canMove(p)) {
         mat[p.getRow()][p.getColumn()] = true;
     }
 
-    // Castling
+    // Castling kingside
     if (getMoveCount() == 0 && !chessMatch->getCheck()) {
-        // King side castling
-        Position t1(position->getRow(), position->getColumn() + 3);
-        if (testRookCastling(t1)) {
-            Position p1(position->getRow(), position->getColumn() + 1);
-            Position p2(position->getRow(), position->getColumn() + 2);
+        // Kingside rook
+        Position posT1(getPosition().getRow(), getPosition().getColumn() + 3);
+        if (testRookCastling(posT1)) {
+            Position p1(getPosition().getRow(), getPosition().getColumn() + 1);
+            Position p2(getPosition().getRow(), getPosition().getColumn() + 2);
             if (getBoard()->piece(p1) == nullptr && getBoard()->piece(p2) == nullptr) {
-                mat[position->getRow()][position->getColumn() + 2] = true;
+                mat[getPosition().getRow()][getPosition().getColumn() + 2] = true;
             }
         }
-        // Queen side castling
-        Position t2(position->getRow(), position->getColumn() - 4);
-        if (testRookCastling(t2)) {
-            Position p1(position->getRow(), position->getColumn() - 1);
-            Position p2(position->getRow(), position->getColumn() - 2);
-            Position p3(position->getRow(), position->getColumn() - 3);
+        // Queenside rook
+        Position posT2(getPosition().getRow(), getPosition().getColumn() - 4);
+        if (testRookCastling(posT2)) {
+            Position p1(getPosition().getRow(), getPosition().getColumn() - 1);
+            Position p2(getPosition().getRow(), getPosition().getColumn() - 2);
+            Position p3(getPosition().getRow(), getPosition().getColumn() - 3);
             if (getBoard()->piece(p1) == nullptr && getBoard()->piece(p2) == nullptr && getBoard()->piece(p3) == nullptr) {
-                mat[position->getRow()][position->getColumn() - 2] = true;
+                mat[getPosition().getRow()][getPosition().getColumn() - 2] = true;
             }
         }
     }

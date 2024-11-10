@@ -11,6 +11,7 @@
 #include "../include/Pawn.h"
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 
 ChessMatch::ChessMatch() : board(8, 8), turn(1), currentPlayer(Color::WHITE), check(false), checkMate(false), enPassantVulnerable(nullptr), promoted(nullptr) {
     initialSetup();
@@ -53,6 +54,7 @@ std::vector<std::vector<ChessPiece*>> ChessMatch::getPieces() const {
 std::vector<std::vector<bool>> ChessMatch::possibleMoves(const ChessPosition& sourcePosition) const {
     Position position = sourcePosition.toPosition();
     validateSourcePosition(position);
+    std::cout << "TESTE" << std::endl;
     return board.piece(position)->possibleMoves();
 }
 
@@ -67,6 +69,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
         undoMove(from, to, capturedPiece);
         throw ChessException("You can't place yourself in check!");
     }
+    std::cout << "TESTnwbhdbwhE" << std::endl;
 
     ChessPiece* movedPiece = dynamic_cast<ChessPiece*>(board.piece(to));
 
@@ -131,10 +134,6 @@ std::unique_ptr<ChessPiece> ChessMatch::newPiece(const std::string& type, Color 
     if (type == "R") return std::make_unique<Rook>(&board, color);
     return std::make_unique<Queen>(&board, color);
 }
-
-#include "ChessMatch.h"
-#include "King.h"
-#include "Pawn.h"
 
 Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
     ChessPiece* p = dynamic_cast<ChessPiece*>(board.removePiece(source));
@@ -232,15 +231,21 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
 }
 
 void ChessMatch::validateSourcePosition(const Position& position) const {
+    std::cout << "TESTE1" << std::endl;
     if (!board.thereIsAPiece(position)) {
         throw ChessException("Error moving piece! Source position empty!");
     }
+        std::cout << "TESTE2" << std::endl;
     if (currentPlayer != dynamic_cast<ChessPiece*>(board.piece(position))->getColor()) {
         throw ChessException("Chosen piece is not yours!");
     }
+        std::cout << "TESTE3" << std::endl;
+
     if (!board.piece(position)->isThereAnyPossibleMove()) {
         throw ChessException("There is no possible move for chosen piece!");
     }
+        std::cout << "TESTE4" << std::endl;
+
 }
 
 void ChessMatch::validateTargetPosition(const Position& from, const Position& to) const {
@@ -262,6 +267,7 @@ ChessPiece* ChessMatch::king(Color color) const {
     for (const auto& piece : piecesOnTheBoard) {
         ChessPiece* chessPiece = dynamic_cast<ChessPiece*>(piece.get());
         if (chessPiece->getColor() == color && dynamic_cast<King*>(chessPiece)) {
+            std::cout << "TESTE REY" << std::endl;
             return chessPiece;
         }
     }
@@ -270,6 +276,7 @@ ChessPiece* ChessMatch::king(Color color) const {
 
 bool ChessMatch::testCheck(Color color) const {
     Position kingPosition = king(color)->getChessPosition().toPosition();
+    std::cout << "TESTE CHECKKKKK" << std::endl;
     for (const auto& piece : piecesOnTheBoard) {
         ChessPiece* opponentPiece = dynamic_cast<ChessPiece*>(piece.get());
         if (opponentPiece->getColor() == opponent(color)) {
