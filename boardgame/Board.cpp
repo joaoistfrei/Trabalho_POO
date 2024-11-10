@@ -1,18 +1,11 @@
-#include "Board.h"
+#include "../include/Board.h"
+#include "../include/BoardException.h"
+#include "../include/Piece.h"
+#include "../include/Position.h"
+#include <vector>
+#include <stdexcept>
 
-Board::Board(int rows, int columns) : rows(rows), columns(columns), pieces(rows, std::vector<Piece*>(columns, nullptr)) {
-    if (rows <= 0 || columns <= 0) {
-        throw BoardException("Error creating board: there must be at least 1 row and 1 column!");
-    }
-}
-
-int Board::getRows() const {
-    return rows;
-}
-
-int Board::getColumns() const {
-    return columns;
-}
+Board::Board(int rows, int columns) : rows(rows), columns(columns), pieces(rows, std::vector<Piece*>(columns, nullptr)) {}
 
 Piece* Board::piece(int row, int column) const {
     if (!positionExists(row, column)) {
@@ -48,7 +41,7 @@ bool Board::thereIsAPiece(Position position) const {
     if (!positionExists(position)) {
         throw BoardException("Position " + position.toString() + " not on the board!");
     }
-    return piece(position) != nullptr;
+    return this->piece(position) != nullptr;
 }
 
 Piece* Board::removePiece(Position position) {
@@ -60,6 +53,13 @@ Piece* Board::removePiece(Position position) {
     }
     Piece* aux = piece(position);
     pieces[position.getRow()][position.getColumn()] = nullptr;
-    aux->position = Position(-1, -1); // Set to an invalid position
     return aux;
+}
+
+int Board::getColumns() const {
+    return columns;
+}
+
+int Board::getRows() const {
+    return rows;
 }

@@ -4,6 +4,14 @@
 #include "Board.h"
 #include "Color.h"
 #include "ChessPiece.h"
+#include "ChessPosition.h"
+#include "ChessException.h"
+#include "Rook.h"
+#include "Knight.h"
+#include "Bishop.h"
+#include "King.h"
+#include "Queen.h"
+#include "Pawn.h"
 #include <vector>
 #include <memory>
 
@@ -16,13 +24,23 @@ private:
     bool checkMate;
     ChessPiece* enPassantVulnerable;
     ChessPiece* promoted;
-    std::vector<std::unique_ptr<ChessPiece>> piecesOnTheBoard;
-    std::vector<std::unique_ptr<ChessPiece>> capturedPieces;
+    std::vector<std::unique_ptr<Piece>> piecesOnTheBoard;
+    std::vector<std::unique_ptr<Piece>> capturedPieces;
 
     void initialSetup();
     void placeNewPiece(char column, int row, std::unique_ptr<ChessPiece> piece);
 
 public:
+    void validateSourcePosition(const Position& position) const;
+    void validateTargetPosition(const Position& from, const Position& to) const;
+    void nextTurn();
+    Color opponent(Color color) const;
+    ChessPiece* king(Color color) const;
+    bool testCheck(Color color) const;
+    bool testCheckMate(Color color) const;
+    Piece* makeMove(const Position& source, const Position& target);
+    void undoMove(const Position& source, const Position& target, Piece* captured);
+
     ChessMatch();
 
     int getTurn() const;
@@ -32,21 +50,12 @@ public:
     ChessPiece* getEnPassantVulnerable() const;
     ChessPiece* getPromoted() const;
 
+    std::vector<std::vector<ChessPiece*>> getPieces() const;
+    std::unique_ptr<ChessPiece> createNewPiece(const std::string& type, Color color); // Renomeado para evitar conflito
+    std::vector<std::vector<bool>> possibleMoves(const ChessPosition& sourcePosition) const;
+    std::unique_ptr<ChessPiece> newPiece(const std::string& type, Color color);
     ChessPiece* replacePromotedPiece(const std::string& type);
-    std::unique_ptr<ChessPiece> createNewPiece(const std::string& type, Color color);
     ChessPiece* performChessMove(const ChessPosition& fromPosition, const ChessPosition& toPosition);
-    std::vector<std::vector<bool>> possibleMoves(const ChessPosition& source) const;
-
-private:
-    Piece makeMove(const Position& source, const Position& target);
-    void undoMove(const Position& source, const Position& target, Piece captured);
-    void validateSourcePosition(const Position& position) const;
-    void validateTargetPosition(const Position& from, const Position& to) const;
-    void nextTurn();
-    Color opponent(Color color) const;
-    ChessPiece king(Color color) const;
-    bool testCheck(Color color) const;
-    bool testCheckMate(Color color) const;
 };
 
 #endif // CHESSMATCH_H

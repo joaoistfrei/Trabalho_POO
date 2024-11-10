@@ -14,16 +14,17 @@ private:
     std::vector<std::vector<Piece*>> pieces;
 
 public:
-    Board();
     Board(int rows, int columns);
 
-    int getRows() const;
-    int getColumns() const;
+    int getRows() const; // Adicionado
+    int getColumns() const; // Adicionado
 
     Piece* piece(int row, int column) const;
     Piece* piece(Position position) const;
 
-    void placePiece(Piece* piece, Position position);
+    //Piece *piece(Position position);
+
+    void placePiece(Piece *piece, Position position);
 
 protected:
     bool positionExists(int row, int column) const;

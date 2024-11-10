@@ -1,14 +1,14 @@
-#include "ChessMatch.h"
-#include "ChessPiece.h"
-#include "Board.h"
-#include "Position.h"
-#include "ChessPosition.h"
-#include "Rook.h"
-#include "Knight.h"
-#include "Bishop.h"
-#include "King.h"
-#include "Queen.h"
-#include "Pawn.h"
+#include "../include/ChessMatch.h"
+#include "../include/ChessPiece.h"
+#include "../include/Board.h"
+#include "../include/Position.h"
+#include "../include/ChessPosition.h"
+#include "../include/Rook.h"
+#include "../include/Knight.h"
+#include "../include/Bishop.h"
+#include "../include/King.h"
+#include "../include/Queen.h"
+#include "../include/Pawn.h"
 #include <algorithm>
 #include <stdexcept>
 
@@ -40,32 +40,20 @@ ChessPiece* ChessMatch::getPromoted() const {
     return promoted;
 }
 
-ChessPiece* ChessMatch::replacePromotedPiece(const std::string& type) {
-    if (promoted == nullptr) {
-        throw std::logic_error("There is no piece to be promoted!");
+std::vector<std::vector<ChessPiece*>> ChessMatch::getPieces() const {
+    std::vector<std::vector<ChessPiece*>> mat(board.getRows(), std::vector<ChessPiece*>(board.getColumns(), nullptr));
+    for (int i = 0; i < board.getRows(); ++i) {
+        for (int j = 0; j < board.getColumns(); ++j) {
+            mat[i][j] = dynamic_cast<ChessPiece*>(board.piece(i, j));
+        }
     }
-    if (type != "B" && type != "N" && type != "R" && type != "Q") {
-        return promoted;
-    }
-
-    Position pos = promoted->getChessPosition().toPosition();
-    Piece* p = board.removePiece(pos);
-    piecesOnTheBoard.erase(std::remove_if(piecesOnTheBoard.begin(), piecesOnTheBoard.end(),
-                                          [p](const std::unique_ptr<Piece>& piece) { return piece.get() == p; }),
-                           piecesOnTheBoard.end());
-
-    std::unique_ptr<ChessPiece> newPiece = createNewPiece(type, promoted->getColor());
-    board.placePiece(newPiece.get(), pos);
-    piecesOnTheBoard.push_back(std::move(newPiece));
-
-    return promoted;
+    return mat;
 }
 
-std::unique_ptr<ChessPiece> ChessMatch::createNewPiece(const std::string& type, Color color) {
-    if (type == "B") return std::make_unique<Bishop>(&board, color);
-    if (type == "N") return std::make_unique<Knight>(&board, color);
-    if (type == "R") return std::make_unique<Rook>(&board, color);
-    return std::make_unique<Queen>(&board, color);
+std::vector<std::vector<bool>> ChessMatch::possibleMoves(const ChessPosition& sourcePosition) const {
+    Position position = sourcePosition.toPosition();
+    validateSourcePosition(position);
+    return board.piece(position)->possibleMoves();
 }
 
 ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, const ChessPosition& toPosition) {
@@ -77,7 +65,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
 
     if (testCheck(currentPlayer)) {
         undoMove(from, to, capturedPiece);
-        throw std::logic_error("You can't place yourself in check!");
+        throw ChessException("You can't place yourself in check!");
     }
 
     ChessPiece* movedPiece = dynamic_cast<ChessPiece*>(board.piece(to));
@@ -106,8 +94,47 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
         enPassantVulnerable = nullptr;
     }
 
-    return capturedPiece;
+    return dynamic_cast<ChessPiece*>(capturedPiece);
 }
+
+ChessPiece* ChessMatch::replacePromotedPiece(const std::string& type) {
+    if (promoted == nullptr) {
+        throw std::logic_error("There is no piece to be promoted!");
+    }
+    if (type != "B" && type != "G" && type != "R" && type != "Q") {
+        return promoted;
+    }
+
+    Position pos = promoted->getChessPosition().toPosition();
+    Piece* p = board.removePiece(pos);
+    piecesOnTheBoard.erase(std::remove_if(piecesOnTheBoard.begin(), piecesOnTheBoard.end(),
+                                          [p](const std::unique_ptr<Piece>& piece) { return piece.get() == p; }),
+                           piecesOnTheBoard.end());
+
+    std::unique_ptr<ChessPiece> newPiece = createNewPiece(type, promoted->getColor());
+    board.placePiece(newPiece.get(), pos);
+    piecesOnTheBoard.push_back(std::move(newPiece));
+
+    return promoted;
+}
+
+std::unique_ptr<ChessPiece> ChessMatch::createNewPiece(const std::string& type, Color color) {
+    if (type == "B") return std::make_unique<Bishop>(&board, color);
+    if (type == "N") return std::make_unique<Knight>(&board, color);
+    if (type == "R") return std::make_unique<Rook>(&board, color);
+    return std::make_unique<Queen>(&board, color);
+}
+
+std::unique_ptr<ChessPiece> ChessMatch::newPiece(const std::string& type, Color color) {
+    if (type == "B") return std::make_unique<Bishop>(&board, color);
+    if (type == "G") return std::make_unique<Knight>(&board, color);
+    if (type == "R") return std::make_unique<Rook>(&board, color);
+    return std::make_unique<Queen>(&board, color);
+}
+
+#include "ChessMatch.h"
+#include "King.h"
+#include "Pawn.h"
 
 Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
     ChessPiece* p = dynamic_cast<ChessPiece*>(board.removePiece(source));
@@ -119,7 +146,7 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
         piecesOnTheBoard.erase(std::remove_if(piecesOnTheBoard.begin(), piecesOnTheBoard.end(),
                                               [captured](const std::unique_ptr<Piece>& piece) { return piece.get() == captured; }),
                                piecesOnTheBoard.end());
-        capturedPieces.push_back(std::unique_ptr<ChessPiece>(dynamic_cast<ChessPiece*>(captured)));
+        capturedPieces.push_back(std::unique_ptr<Piece>(captured));
     }
 
     // Castling kingside
@@ -130,7 +157,6 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
         board.placePiece(rook, targetT);
         rook->increaseMoveCount();
     }
-
     // Castling queenside
     if (dynamic_cast<King*>(p) && target.getColumn() == source.getColumn() - 2) {
         Position sourceT(source.getRow(), source.getColumn() - 4);
@@ -143,14 +169,14 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
     // En passant
     if (dynamic_cast<Pawn*>(p)) {
         if (source.getColumn() != target.getColumn() && captured == nullptr) {
-            Position pawnPos;
+            Position pawnPosition;
             if (p->getColor() == Color::WHITE) {
-                pawnPos = Position(target.getRow() + 1, target.getColumn());
+                pawnPosition = Position(target.getRow() + 1, target.getColumn());
             } else {
-                pawnPos = Position(target.getRow() - 1, target.getColumn());
+                pawnPosition = Position(target.getRow() - 1, target.getColumn());
             }
-            captured = board.removePiece(pawnPos);
-            capturedPieces.push_back(std::unique_ptr<ChessPiece>(dynamic_cast<ChessPiece*>(captured)));
+            captured = board.removePiece(pawnPosition);
+            capturedPieces.push_back(std::unique_ptr<Piece>(captured));
             piecesOnTheBoard.erase(std::remove_if(piecesOnTheBoard.begin(), piecesOnTheBoard.end(),
                                                   [captured](const std::unique_ptr<Piece>& piece) { return piece.get() == captured; }),
                                    piecesOnTheBoard.end());
@@ -167,8 +193,10 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
 
     if (captured != nullptr) {
         board.placePiece(captured, target);
-        capturedPieces.pop_back();
-        piecesOnTheBoard.push_back(std::unique_ptr<ChessPiece>(dynamic_cast<ChessPiece*>(captured)));
+        capturedPieces.erase(std::remove_if(capturedPieces.begin(), capturedPieces.end(),
+                                            [captured](const std::unique_ptr<Piece>& piece) { return piece.get() == captured; }),
+                             capturedPieces.end());
+        piecesOnTheBoard.push_back(std::unique_ptr<Piece>(captured));
     }
 
     // Castling kingside
@@ -179,7 +207,6 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
         board.placePiece(rook, sourceT);
         rook->decreaseMoveCount();
     }
-
     // Castling queenside
     if (dynamic_cast<King*>(p) && target.getColumn() == source.getColumn() - 2) {
         Position sourceT(source.getRow(), source.getColumn() - 4);
@@ -193,37 +220,42 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
     if (dynamic_cast<Pawn*>(p)) {
         if (source.getColumn() != target.getColumn() && captured == enPassantVulnerable) {
             ChessPiece* pawn = dynamic_cast<ChessPiece*>(board.removePiece(target));
-            Position pawnPos(p->getColor() == Color::WHITE ? 3 : 4, target.getColumn());
-            board.placePiece(pawn, pawnPos);
+            Position pawnPosition;
+            if (p->getColor() == Color::WHITE) {
+                pawnPosition = Position(3, target.getColumn());
+            } else {
+                pawnPosition = Position(4, target.getColumn());
+            }
+            board.placePiece(pawn, pawnPosition);
         }
     }
 }
 
 void ChessMatch::validateSourcePosition(const Position& position) const {
     if (!board.thereIsAPiece(position)) {
-        throw std::logic_error("Error moving piece! Source position empty!");
+        throw ChessException("Error moving piece! Source position empty!");
     }
     if (currentPlayer != dynamic_cast<ChessPiece*>(board.piece(position))->getColor()) {
-        throw std::logic_error("Chosen piece is not yours!");
+        throw ChessException("Chosen piece is not yours!");
     }
-    if (!dynamic_cast<ChessPiece*>(board.piece(position))->isThereAnyPossibleMove()) {
-        throw std::logic_error("There is no possible move for chosen piece!");
+    if (!board.piece(position)->isThereAnyPossibleMove()) {
+        throw ChessException("There is no possible move for chosen piece!");
     }
 }
 
 void ChessMatch::validateTargetPosition(const Position& from, const Position& to) const {
-    if (!dynamic_cast<ChessPiece*>(board.piece(from))->possibleMove(to)) {
-        throw std::logic_error("The chosen piece can't move to target position!");
+    if (!board.piece(from)->possibleMove(to)) {
+        throw ChessException("The chosen piece can't move to target position!");
     }
 }
 
 void ChessMatch::nextTurn() {
     turn++;
-    currentPlayer = (currentPlayer == Color::WHITE ? Color.BLACK : Color.WHITE);
+    currentPlayer = (currentPlayer == Color::WHITE ? Color::BLACK : Color::WHITE);
 }
 
 Color ChessMatch::opponent(Color color) const {
-    return (color == Color.WHITE ? Color.BLACK : Color.WHITE);
+    return (color == Color::WHITE ? Color::BLACK : Color::WHITE);
 }
 
 ChessPiece* ChessMatch::king(Color color) const {
@@ -233,15 +265,15 @@ ChessPiece* ChessMatch::king(Color color) const {
             return chessPiece;
         }
     }
-    throw std::logic_error("There is no " + std::string(color == Color::WHITE ? "WHITE" : "BLACK") + " king on the board!");
+    throw std::logic_error("There is no " + std::to_string(static_cast<int>(color)) + " king on the board!");
 }
 
 bool ChessMatch::testCheck(Color color) const {
     Position kingPosition = king(color)->getChessPosition().toPosition();
     for (const auto& piece : piecesOnTheBoard) {
-        ChessPiece* chessPiece = dynamic_cast<ChessPiece*>(piece.get());
-        if (chessPiece->getColor() != color) {
-            std::vector<std::vector<bool>> mat = chessPiece->possibleMoves();
+        ChessPiece* opponentPiece = dynamic_cast<ChessPiece*>(piece.get());
+        if (opponentPiece->getColor() == opponent(color)) {
+            std::vector<std::vector<bool>> mat = opponentPiece->possibleMoves();
             if (mat[kingPosition.getRow()][kingPosition.getColumn()]) {
                 return true;
             }
@@ -263,9 +295,9 @@ bool ChessMatch::testCheckMate(Color color) const {
                     if (mat[i][j]) {
                         Position source = chessPiece->getChessPosition().toPosition();
                         Position target(i, j);
-                        Piece* capturedPiece = makeMove(source, target);
+                         Piece* capturedPiece = const_cast<ChessMatch*>(this)->makeMove(source, target);
                         bool testCheck = this->testCheck(color);
-                        undoMove(source, target, capturedPiece);
+                        const_cast<ChessMatch*>(this)->undoMove(source, target, capturedPiece);
                         if (!testCheck) {
                             return false;
                         }
@@ -310,7 +342,7 @@ void ChessMatch::initialSetup() {
     placeNewPiece('d', 8, std::make_unique<Queen>(&board, Color::BLACK));
 
     // Pawn
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < board.getColumns(); ++i) {
         placeNewPiece('a' + i, 2, std::make_unique<Pawn>(&board, Color::WHITE, this));
         placeNewPiece('a' + i, 7, std::make_unique<Pawn>(&board, Color::BLACK, this));
     }
