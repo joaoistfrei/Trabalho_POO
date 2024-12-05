@@ -34,7 +34,7 @@ void UI::printMatch(const ChessMatch* chessMatch, const vector<ChessPiece*>& cap
         }
     } else {
         cout << "CHECKMATE!" << endl;
-        cout << "Winner: " << (chessMatch->getCurrentPlayer() == Color::WHITE ? "BLACK" : "WHITE") << endl;
+        cout << "Winner: " << (chessMatch->getCurrentPlayer() == Color::WHITE ? "WHITE" : "BLACK") << endl;
     }
 }
 

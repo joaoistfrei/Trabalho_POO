@@ -379,7 +379,7 @@ void ChessMatch::initialSetup() {
 
     // Bishop
     placeNewPiece('c', 1, std::make_unique<Bishop>(&board, Color::WHITE));
-    placeNewPiece('f', 6, std::make_unique<Bishop>(&board, Color::WHITE));
+    placeNewPiece('f', 1, std::make_unique<Bishop>(&board, Color::WHITE));
     placeNewPiece('c', 8, std::make_unique<Bishop>(&board, Color::BLACK));
     placeNewPiece('f', 8, std::make_unique<Bishop>(&board, Color::BLACK));
 
@@ -388,7 +388,7 @@ void ChessMatch::initialSetup() {
     placeNewPiece('e', 8, std::make_unique<King>(&board, Color::BLACK, this));
 
     // Queen
-    placeNewPiece('d', 1, std::make_unique<Queen>(&board, Color::WHITE));
+    placeNewPiece('d', 3, std::make_unique<Queen>(&board, Color::WHITE));
     placeNewPiece('d', 8, std::make_unique<Queen>(&board, Color::BLACK));
 
     // Pawn
