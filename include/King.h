@@ -16,7 +16,7 @@ private:
     bool testRookCastling(Position position) const;
 
 public:
-    King(Board* board, Color color, ChessMatch* chessMatch);
+    King(Board* board, PieceColor color, ChessMatch* chessMatch);
     std::string toString() const override; // Adicionado o método toString
     std::vector<std::vector<bool>> possibleMoves() const override;
 };

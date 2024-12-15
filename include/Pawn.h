@@ -13,7 +13,7 @@ private:
     ChessMatch* chessMatch;
 
 public:
-    Pawn(Board* board, Color color, ChessMatch* chessMatch);
+    Pawn(Board* board, PieceColor color, ChessMatch* chessMatch);
     std::string toString() const override; // Adicionado o método toString
     std::vector<std::vector<bool>> possibleMoves() const override;
 };

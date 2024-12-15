@@ -11,7 +11,7 @@ private:
     bool canMove(Position position) const;
 
 public:
-    Knight(Board* board, Color color);
+    Knight(Board* board, PieceColor color);
     std::string toString() const override; // Adicionado o método toString
     std::vector<std::vector<bool>> possibleMoves() const override;
 };

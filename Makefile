@@ -1,6 +1,7 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Iinclude -c -std=c++14 -Wall
+CXXFLAGS = -Iinclude -c -std=c++14 -Wall -Wextra -g
+LDFLAGS = -lraylib
 
 # Source directories
 SRC_DIRS = boardgame chess chess/pieces application
@@ -19,7 +20,7 @@ all: $(TARGET)
 
 # Linking
 $(TARGET): $(OBJECTS)
-	$(CXX) $(OBJECTS) -o $(TARGET)
+	$(CXX) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
 
 # Compilation rule
 bin/%.o: %.cpp
@@ -32,3 +33,4 @@ clean:
 	rm -rf bin
 
 .PHONY: all clean
+

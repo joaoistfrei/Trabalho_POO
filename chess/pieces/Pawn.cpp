@@ -1,7 +1,7 @@
 #include "../../include/Pawn.h"
 #include "../../include/ChessMatch.h"
 
-Pawn::Pawn(Board* board, Color color, ChessMatch* chessMatch) : ChessPiece(board, color), chessMatch(chessMatch) {}
+Pawn::Pawn(Board* board, PieceColor color, ChessMatch* chessMatch) : ChessPiece(board, color), chessMatch(chessMatch) {}
 
 std::string Pawn::toString() const {
     return "P"; // Representação da peça Rook
@@ -11,7 +11,7 @@ std::vector<std::vector<bool>> Pawn::possibleMoves() const {
     std::vector<std::vector<bool>> mat(getBoard()->getRows(), std::vector<bool>(getBoard()->getColumns(), false));
     Position p(0, 0);
 
-    if (getColor() == Color::WHITE) {
+    if (getColor() == PieceColor::W) {
         p.setValues(position.getRow() - 1, position.getColumn());
         if (getBoard()->positionExists(p) && !getBoard()->thereIsAPiece(p)) {
             mat[p.getRow()][p.getColumn()] = true;

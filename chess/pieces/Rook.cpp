@@ -1,6 +1,6 @@
 #include "../../include/Rook.h"
 
-Rook::Rook(Board* board, Color color) : ChessPiece(board, color) {}
+Rook::Rook(Board* board, PieceColor color) : ChessPiece(board, color) {}
 
 std::string Rook::toString() const {
     return "R"; // Representação da peça Rook

@@ -1,6 +1,6 @@
 #include "../../include/Bishop.h"
 
-Bishop::Bishop(Board* board, Color color) : ChessPiece(board, color) {}
+Bishop::Bishop(Board* board, PieceColor color) : ChessPiece(board, color) {}
 
 std::string Bishop::toString() const {
     return "B"; // Representação da peça Bishop

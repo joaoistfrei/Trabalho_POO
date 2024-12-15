@@ -19,60 +19,66 @@
 #include "../include/Pawn.h"
 #include "../include/UI.h"
 #include <limits>
+#include <raylib.h>
 
 using namespace std;
 
-int main() {
-    ChessMatch* chessMatch = new ChessMatch();
-    vector<ChessPiece*> captured;
+    int main() {
+        ChessMatch* chessMatch = new ChessMatch();
+        vector<ChessPiece*> captured;
+        int windowWidth = 1000;
+        int windowHeight = 1000;
 
-    while (!chessMatch->getCheckMate()) {
-        try {
-            UI::clearScreen();
-            UI::printMatch(chessMatch, captured);
-            cout << endl;
-            cout << "Source: ";
-            ChessPosition source = UI::readChessPosition();
-            cout << source.toString() << endl;
+        Color grey = {29, 29, 30, 255};
 
-            vector<vector<bool>> possibleMoves = chessMatch->possibleMoves(source);
-            UI::clearScreen();
-            UI::printBoard(chessMatch->getPieces(), possibleMoves);
+        InitWindow(windowWidth, windowHeight, "BetterChess BETA");
+        SetTargetFPS(60);
 
-            cout << endl;
-            cout << "Target: ";
-            ChessPosition target = UI::readChessPosition();
+        UI ui;
+        while (!WindowShouldClose()) {
+            ClearBackground(grey);
+            BeginDrawing();
+            ui.Draw();
+            EndDrawing();
+            try {
+                ChessPosition source = ui.SelectPosition();
+                cout << source.toString() << endl;
 
-            ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
-            //cout << "CRAWLLLL" << endl;
-            if (capturedPiece != nullptr) {
-                captured.push_back(capturedPiece);
-            }
+                vector<vector<bool>> possibleMoves = chessMatch->possibleMoves(source);
+                // Dar uma forma de printar as regiões possíveis
 
-            if (chessMatch->getPromoted() != nullptr) {
-                cout << "Enter piece for promotion (B/N/R/Q): ";
-                string type;
-                cin >> type;
-                transform(type.begin(), type.end(), type.begin(), ::toupper);
-                while (type != "B" && type != "N" && type != "R" && type != "Q") {
-                    cout << "Invalid value! Enter piece for promotion (B/N/R/Q): ";
-                    cin >> type;
-                    transform(type.begin(), type.end(), type.begin(), ::toupper);
+                ChessPosition target = ui.SelectPosition();
+                
+                ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
+                ui.MovePiece(source, target);
+                //cout << "CRAWLLLL" << endl;
+                if (capturedPiece != nullptr) {
+                    captured.push_back(capturedPiece);
+                    ui.removePiece(capturedPiece);
                 }
-                chessMatch->replacePromotedPiece(type);
+
+                // if (chessMatch->getPromoted() != nullptr) {
+                //     cout << "Enter piece for promotion (B/N/R/Q): ";
+                //     string type;
+                //     cin >> type;
+                //     transform(type.begin(), type.end(), type.begin(), ::toupper);
+                //     while (type != "B" && type != "N" && type != "R" && type != "Q") {
+                //         cout << "Invalid value! Enter piece for promotion (B/N/R/Q): ";
+                //         cin >> type;
+                //         transform(type.begin(), type.end(), type.begin(), ::toupper);
+                //     }
+                //     chessMatch->replacePromotedPiece(type);
+                // }
+            } catch (const ChessException& e) {
+                cout << e.what() << endl;
+                // cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            } catch (const invalid_argument& e) {
+                cout << e.what() << endl;
+                // cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
-
-        } catch (const ChessException& e) {
-            cout << e.what() << endl;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        } catch (const invalid_argument& e) {
-            cout << e.what() << endl;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-    }
-    UI::clearScreen();
-    UI::printMatch(chessMatch, captured);
 
-    delete chessMatch;
-    return 0;
-}
+        CloseWindow();
+        delete chessMatch;
+        return 0;
+    }

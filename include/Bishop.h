@@ -11,7 +11,7 @@ private:
     bool canMove(Position position) const;
 
 public:
-    Bishop(Board* board, Color color);
+    Bishop(Board* board, PieceColor color);
     std::string toString() const override; // Adicionado o método toString
     std::vector<std::vector<bool>> possibleMoves() const override;
 };

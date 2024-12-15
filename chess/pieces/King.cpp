@@ -6,7 +6,7 @@ std::string King::toString() const {
     return "K"; // Representação da peça King
 }
 
-King::King(Board* board, Color color, ChessMatch* chessMatch) : ChessPiece(board, color), chessMatch(chessMatch) {}
+King::King(Board* board, PieceColor color, ChessMatch* chessMatch) : ChessPiece(board, color), chessMatch(chessMatch) {}
 
 bool King::canMove(Position position) const {
     ChessPiece* p = dynamic_cast<ChessPiece*>(getBoard()->piece(position));

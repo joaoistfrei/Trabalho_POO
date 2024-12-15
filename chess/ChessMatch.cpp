@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <iostream>
 
-ChessMatch::ChessMatch() : board(8, 8), turn(1), currentPlayer(Color::WHITE), check(false), checkMate(false), enPassantVulnerable(nullptr), promoted(nullptr) {
+ChessMatch::ChessMatch() : board(8, 8), turn(1), currentPlayer(PieceColor::W), check(false), checkMate(false), enPassantVulnerable(nullptr), promoted(nullptr) {
     initialSetup();
 }
 
@@ -35,7 +35,7 @@ bool ChessMatch::getCheckMate() const {
     return checkMate;
 }
 
-Color ChessMatch::getCurrentPlayer() const {
+PieceColor ChessMatch::getCurrentPlayer() const {
     return currentPlayer;
 }
 
@@ -90,7 +90,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
     // Promotion
     promoted = nullptr;
     if (dynamic_cast<Pawn*>(movedPiece)) {
-        if ((movedPiece->getColor() == Color::WHITE && to.getRow() == 0) || (movedPiece->getColor() == Color::BLACK && to.getRow() == 7)) {
+        if ((movedPiece->getColor() == PieceColor::W && to.getRow() == 0) || (movedPiece->getColor() == PieceColor::W && to.getRow() == 7)) {
             promoted = dynamic_cast<ChessPiece*>(board.piece(to));
             promoted = replacePromotedPiece("Q");
         }
@@ -148,14 +148,14 @@ ChessPiece* ChessMatch::replacePromotedPiece(const std::string& type) {
     return promoted;
 }
 
-std::unique_ptr<ChessPiece> ChessMatch::createNewPiece(const std::string& type, Color color) {
+std::unique_ptr<ChessPiece> ChessMatch::createNewPiece(const std::string& type, PieceColor color) {
     if (type == "B") return std::make_unique<Bishop>(&board, color);
     if (type == "N") return std::make_unique<Knight>(&board, color);
     if (type == "R") return std::make_unique<Rook>(&board, color);
     return std::make_unique<Queen>(&board, color);
 }
 
-std::unique_ptr<ChessPiece> ChessMatch::newPiece(const std::string& type, Color color) {
+std::unique_ptr<ChessPiece> ChessMatch::newPiece(const std::string& type, PieceColor color) {
     if (type == "B") return std::make_unique<Bishop>(&board, color);
     if (type == "G") return std::make_unique<Knight>(&board, color);
     if (type == "R") return std::make_unique<Rook>(&board, color);
@@ -207,7 +207,7 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
     if (dynamic_cast<Pawn*>(p)) {
         if (source.getColumn() != target.getColumn() && capturedPiece == nullptr) {
             Position pawnPos;
-            if (p->getColor() == Color::WHITE) {
+            if (p->getColor() == PieceColor::W) {
                 pawnPos = Position(target.getRow() + 1, target.getColumn());
             } else {
                 pawnPos = Position(target.getRow() - 1, target.getColumn());
@@ -263,7 +263,7 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
         if (source.getColumn() != target.getColumn() && captured == enPassantVulnerable) {
             ChessPiece* pawn = dynamic_cast<ChessPiece*>(board.removePiece(target));
             Position pawnPosition;
-            if (p->getColor() == Color::WHITE) {
+            if (p->getColor() == PieceColor::W) {
                 pawnPosition = Position(3, target.getColumn());
             } else {
                 pawnPosition = Position(4, target.getColumn());
@@ -299,14 +299,14 @@ void ChessMatch::validateTargetPosition(const Position& from, const Position& to
 
 void ChessMatch::nextTurn() {
     turn++;
-    currentPlayer = (currentPlayer == Color::WHITE ? Color::BLACK : Color::WHITE);
+    currentPlayer = (currentPlayer == PieceColor::W ? PieceColor::W : PieceColor::W);
 }
 
-Color ChessMatch::opponent(Color color) const {
-    return (color == Color::WHITE ? Color::BLACK : Color::WHITE);
+PieceColor ChessMatch::opponent(PieceColor color) const {
+    return (color == PieceColor::W ? PieceColor::W : PieceColor::W);
 }
 
-ChessPiece* ChessMatch::king(Color color) const {
+ChessPiece* ChessMatch::king(PieceColor color) const {
     for (const auto& piece : piecesOnTheBoard) {
         ChessPiece* chessPiece = dynamic_cast<ChessPiece*>(piece.get());
         if (chessPiece->getColor() == color && dynamic_cast<King*>(chessPiece)) {
@@ -317,7 +317,7 @@ ChessPiece* ChessMatch::king(Color color) const {
     throw std::logic_error("There is no " + std::to_string(static_cast<int>(color)) + " king on the board!");
 }
 
-bool ChessMatch::testCheck(Color color) const {
+bool ChessMatch::testCheck(PieceColor color) const {
     Position kingPosition = king(color)->getChessPosition().toPosition();
     std::cout << "TESTE CHECKKKKK" << std::endl;
     for (const auto& piece : piecesOnTheBoard) {
@@ -332,7 +332,7 @@ bool ChessMatch::testCheck(Color color) const {
     return false;
 }
 
-bool ChessMatch::testCheckMate(Color color) const {
+bool ChessMatch::testCheckMate(PieceColor color) const {
     if (!testCheck(color)) {
         return false;
     }
@@ -366,34 +366,34 @@ void ChessMatch::placeNewPiece(char column, int row, std::unique_ptr<ChessPiece>
 
 void ChessMatch::initialSetup() {
     // Rook
-    placeNewPiece('a', 1, std::make_unique<Rook>(&board, Color::WHITE));
-    placeNewPiece('h', 1, std::make_unique<Rook>(&board, Color::WHITE));
-    placeNewPiece('a', 8, std::make_unique<Rook>(&board, Color::BLACK));
-    placeNewPiece('h', 8, std::make_unique<Rook>(&board, Color::BLACK));
+    placeNewPiece('a', 1, std::make_unique<Rook>(&board, PieceColor::W));
+    placeNewPiece('h', 1, std::make_unique<Rook>(&board, PieceColor::W));
+    placeNewPiece('a', 8, std::make_unique<Rook>(&board, PieceColor::B));
+    placeNewPiece('h', 8, std::make_unique<Rook>(&board, PieceColor::B));
 
     // Knight
-    placeNewPiece('b', 1, std::make_unique<Knight>(&board, Color::WHITE));
-    placeNewPiece('g', 1, std::make_unique<Knight>(&board, Color::WHITE));
-    placeNewPiece('b', 8, std::make_unique<Knight>(&board, Color::BLACK));
-    placeNewPiece('g', 8, std::make_unique<Knight>(&board, Color::BLACK));
+    placeNewPiece('b', 1, std::make_unique<Knight>(&board, PieceColor::W));
+    placeNewPiece('g', 1, std::make_unique<Knight>(&board, PieceColor::W));
+    placeNewPiece('b', 8, std::make_unique<Knight>(&board, PieceColor::B));
+    placeNewPiece('g', 8, std::make_unique<Knight>(&board, PieceColor::B));
 
     // Bishop
-    placeNewPiece('c', 1, std::make_unique<Bishop>(&board, Color::WHITE));
-    placeNewPiece('f', 1, std::make_unique<Bishop>(&board, Color::WHITE));
-    placeNewPiece('c', 8, std::make_unique<Bishop>(&board, Color::BLACK));
-    placeNewPiece('f', 8, std::make_unique<Bishop>(&board, Color::BLACK));
+    placeNewPiece('c', 1, std::make_unique<Bishop>(&board, PieceColor::W));
+    placeNewPiece('f', 1, std::make_unique<Bishop>(&board, PieceColor::W));
+    placeNewPiece('c', 8, std::make_unique<Bishop>(&board, PieceColor::B));
+    placeNewPiece('f', 8, std::make_unique<Bishop>(&board, PieceColor::B));
 
     // King
-    placeNewPiece('e', 1, std::make_unique<King>(&board, Color::WHITE, this));
-    placeNewPiece('e', 8, std::make_unique<King>(&board, Color::BLACK, this));
+    placeNewPiece('e', 1, std::make_unique<King>(&board, PieceColor::W, this));
+    placeNewPiece('e', 8, std::make_unique<King>(&board, PieceColor::B, this));
 
     // Queen
-    placeNewPiece('d', 3, std::make_unique<Queen>(&board, Color::WHITE));
-    placeNewPiece('d', 8, std::make_unique<Queen>(&board, Color::BLACK));
+    placeNewPiece('d', 1, std::make_unique<Queen>(&board, PieceColor::W));
+    placeNewPiece('d', 8, std::make_unique<Queen>(&board, PieceColor::B));
 
     // Pawn
     for (int i = 0; i < board.getColumns(); ++i) {
-        placeNewPiece('a' + i, 2, std::make_unique<Pawn>(&board, Color::WHITE, this));
-        placeNewPiece('a' + i, 7, std::make_unique<Pawn>(&board, Color::BLACK, this));
+        placeNewPiece('a' + i, 2, std::make_unique<Pawn>(&board, PieceColor::W, this));
+        placeNewPiece('a' + i, 7, std::make_unique<Pawn>(&board, PieceColor::B, this));
     }
 }

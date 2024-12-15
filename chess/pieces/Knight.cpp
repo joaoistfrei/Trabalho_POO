@@ -1,6 +1,6 @@
 #include "../../include/Knight.h"
 
-Knight::Knight(Board* board, Color color) : ChessPiece(board, color) {}
+Knight::Knight(Board* board, PieceColor color) : ChessPiece(board, color) {}
 
 std::string Knight::toString() const {
     return "N"; // Representação da peça Knight

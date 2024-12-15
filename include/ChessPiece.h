@@ -9,15 +9,15 @@
 
 class ChessPiece : public Piece {
 private:
-    Color color;
+    PieceColor color;
     int moveCount;
 
 public:
-    ChessPiece(Board* board, Color color);
+    ChessPiece(Board* board, PieceColor color);
     virtual ~ChessPiece() = default; // Destrutor virtual default
 
 
-    Color getColor() const;
+    PieceColor getColor() const;
     int getMoveCount() const;
     void increaseMoveCount();
     void decreaseMoveCount();

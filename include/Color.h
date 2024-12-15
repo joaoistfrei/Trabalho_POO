@@ -1,9 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-enum class Color {
-    BLACK,
-    WHITE
+enum class PieceColor {
+    B,
+    W
 };
 
 #endif // COLOR_H

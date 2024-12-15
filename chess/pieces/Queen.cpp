@@ -1,6 +1,6 @@
 #include "../../include/Queen.h"
 
-Queen::Queen(Board* board, Color color) : ChessPiece(board, color) {}
+Queen::Queen(Board* board, PieceColor color) : ChessPiece(board, color) {}
 
 std::string Queen::toString() const {
     return "Q"; // Representação da peça Queen

@@ -1,9 +1,11 @@
 #include <raylib.h>
 #include "../include/game.hpp"
+#include <iostream>
 
 int main() {
-    int windowWidth = 900;
-    int windowHeight = 900;
+    int windowWidth = 1000;
+    int windowHeight = 1000;
+    bool isPieceSelected = false;
 
     Color grey = {29, 29, 30, 255};
 
@@ -14,7 +16,8 @@ int main() {
 
     while(!WindowShouldClose()){
 
-        game.HandleInput();
+        game.HandleInput(isPieceSelected);
+        // std::cout << isPieceSelected << std::endl;
         game.Update();
         
         BeginDrawing();

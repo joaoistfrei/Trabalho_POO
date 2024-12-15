@@ -1,8 +1,8 @@
 #include "../include/ChessPiece.h"
 
-ChessPiece::ChessPiece(Board* board, Color color) : Piece(board), color(color), moveCount(0) {}
+ChessPiece::ChessPiece(Board* board, PieceColor color) : Piece(board), color(color), moveCount(0) {}
 
-Color ChessPiece::getColor() const {
+PieceColor ChessPiece::getColor() const {
     return color;
 }
 
