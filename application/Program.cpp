@@ -27,23 +27,23 @@ using namespace std;
         ChessMatch* chessMatch = new ChessMatch();
         int windowWidth = 1000;
         int windowHeight = 1000;
-
-        Color grey = {29, 29, 30, 255};
+    
+        // Color grey = {29, 29, 30, 255};
 
         InitWindow(windowWidth, windowHeight, "BetterChess BETA");
         SetTargetFPS(60);
 
         UI ui;
-        while (!WindowShouldClose()) {
+        while (!WindowShouldClose() || !chessMatch->getCheckMate()) {
             vector<vector<bool>> possibleMoves;
-            ClearBackground(grey);
+            ClearBackground(GRAY);
             BeginDrawing();
             ui.Draw(possibleMoves);
             EndDrawing();
             try {
                 ChessPosition source = ui.SelectPosition(possibleMoves);
                 cout << source.toString() << endl;
-                std::cout << "peça escolhida " << std::endl;
+
                 possibleMoves = chessMatch->possibleMoves(source);
                 
                 ChessPosition target = ui.SelectPosition(possibleMoves);
@@ -51,33 +51,29 @@ using namespace std;
                 std::cout << "destino escolhido" << std::endl;
 
                 ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
-                ui.MovePiece(source, target);
-                //cout << "CRAWLLLL" << endl;
+                ui.MovePiece(source, target, chessMatch->getCastling());
+                
                 if (capturedPiece != nullptr){
                     ui.removePiece(capturedPiece);
                 }
 
-                // if (chessMatch->getPromoted() != nullptr) {
-                //     cout << "Enter piece for promotion (B/N/R/Q): ";
-                //     string type;
-                //     cin >> type;
-                //     transform(type.begin(), type.end(), type.begin(), ::toupper);
-                //     while (type != "B" && type != "N" && type != "R" && type != "Q") {
-                //         cout << "Invalid value! Enter piece for promotion (B/N/R/Q): ";
-                //         cin >> type;
-                //         transform(type.begin(), type.end(), type.begin(), ::toupper);
-                //     }
-                //     chessMatch->replacePromotedPiece(type);
-                // }
+                if (chessMatch->getPromoted() != nullptr) {
+                    ChessPiece* promoPiece = chessMatch->getPromoted();
+                    ui.fillPromotionList(promoPiece->getColor());
+                    string promotionType = ui.selectPromotionPiece(possibleMoves);
+                    chessMatch->replacePromotedPiece(promotionType);
+
+                    ui.replacePromotedPiece(promoPiece->getChessPosition(), promoPiece->getColor(), ui.toPieces(promotionType[0]));
+                }
             } catch (const ChessException& e) {
                 cout << e.what() << endl;
-                // cin.ignore(numeric_limits<streamsize>::max(), '\n');
             } catch (const invalid_argument& e) {
                 cout << e.what() << endl;
-                // cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            } catch (const runtime_error & e) {
+                cout << e.what() << endl;
+                break;
             }
         }
-
         CloseWindow();
         delete chessMatch;
         return 0;

@@ -95,6 +95,8 @@ void Game::Draw(){
         it->second->Draw();
     for(auto it = _whitePieceList.begin(); it != _whitePieceList.end(); it++)
         it->second->Draw(); 
+       
+
 }
 
 void Game::Update(){

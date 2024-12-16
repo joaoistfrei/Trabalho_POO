@@ -25,6 +25,8 @@ private:
     bool checkMate;
     ChessPiece* enPassantVulnerable;
     ChessPiece* promoted;
+    int castling;
+    bool enPassantCompleted;
     std::list<std::unique_ptr<Piece>> piecesOnTheBoard;
     std::list<std::unique_ptr<Piece>> capturedPieces;
 
@@ -48,6 +50,8 @@ public:
     int getTurn() const;
     bool getCheck() const;
     bool getCheckMate() const;
+    int getCastling() const { return castling;}
+    bool getEnPassantCompleted() const { return enPassantCompleted;}
     PieceColor getCurrentPlayer() const;
     ChessPiece* getEnPassantVulnerable() const;
     ChessPiece* getPromoted() const;

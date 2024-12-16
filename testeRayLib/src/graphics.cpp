@@ -44,7 +44,7 @@ PieceImage::PieceImage(int piece, int color, Vector2 pos){
             img = LoadImage("../Images/Pawn.png"); 
         }break;
     }
-    ImageResize(&img, 60, 100);
+    ImageResize(&img, 120, 200);
     image = LoadTextureFromImage(img);
     position.x = pos.x + (SQUARE_SIZE - image.width)/2;
     position.y = pos.y;

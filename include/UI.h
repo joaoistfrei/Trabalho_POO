@@ -39,7 +39,7 @@ enum Pieces{
 
 class PieceImage{
     public:
-        PieceImage(int piece = 0, PieceColor color = PieceColor::B, Vector2 pos = {0,0}, bool removed = false);
+        PieceImage(int piece = 0, PieceColor color = PieceColor::B, Vector2 pos = {0,0}, int format = 0);
         ~PieceImage();
         void Draw();
         void MoveTo(Vector2 targetPos);
@@ -56,30 +56,31 @@ class UI{
     public:
         UI();
         ~UI();
-        void addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, int type, PieceColor color, float x, float y);
+        void addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, Pieces type, PieceColor color, float x, float y, int format = 0);
         void Draw(std::vector<std::vector<bool>> possibleMoves);
         void Update();
         ChessPosition SelectPosition(std::vector<std::vector<bool>> possibleMoves);
-        void MovePiece(const ChessPosition& source, const ChessPosition& target);
+        void MovePiece(const ChessPosition& source, const ChessPosition& target, int isCastling);
         PieceImage* findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList);
         int PieceMouseSelect(Vector2 mousePos);
-        // int GetSelectedPiece(){ return selectedPiece; }
         std::string getSelectedPosString();
-        void setTurn(bool t){ turn = t; }
         void removePiece(ChessPiece* capturedPiece);
         void removePieceFromList(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList, PieceColor color);
         void addToRemovedList(int p, PieceColor color);
 
-        //void StartScreen();
+        void fillPromotionList(PieceColor color);
+        std::string selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves);
+        void replacePromotedPiece(ChessPosition pos, PieceColor color, Pieces type);
+        Pieces toPieces(char piece);
 
-        const Vector2 invalidPos = {-1, -1};
+        //void StartScreen();
     private:
         void DrawChessBoard(std::vector<std::vector<bool>> possibleMoves);
-        bool turn; // 0 = black, 1 = white
         std::vector<std::pair<int, PieceImage*>> _whitePieceList;
         std::vector<std::pair<int, PieceImage*>> _blackPieceList;
         std::vector<std::pair<int, PieceImage*>> _whiteRemovedList;
         std::vector<std::pair<int, PieceImage*>> _blackRemovedList;
+        std::vector<std::pair<int, PieceImage*>> _promotionList;
         int selectedPiece;
         PieceImage pawn;
 };

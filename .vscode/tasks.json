@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build with Makefile",
+        "type": "shell",
+        "command": "make",
+        "args": [],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": ["$gcc"],
+        "detail": "Compila o projeto com base no Makefile"
+      },
+      {
+        "label": "Clean Build",
+        "type": "shell",
+        "command": "make",
+        "args": ["clean"],
+        "problemMatcher": [],
+        "group": {
+          "kind": "build",
+          "isDefault": false
+        },
+        "detail": "Limpa os arquivos gerados pelo Makefile"
+      }
+    ]
+  }
+  

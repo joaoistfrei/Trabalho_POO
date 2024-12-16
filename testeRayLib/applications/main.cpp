@@ -23,6 +23,9 @@ int main() {
         BeginDrawing();
         ClearBackground(grey);
         game.Draw();
+        
+        PieceImage teste(0, 0, {GetScreenHeight(), GetScreenWidth()});
+
 
         
         EndDrawing();

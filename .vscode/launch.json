@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug my_program",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/bin/my_program",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/bin/",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+          {
+            "description": "Habilitar formatação para impressão do gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ],
+        "preLaunchTask": "Build with Makefile"
+      }
+    ]
+  }
