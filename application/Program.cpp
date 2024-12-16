@@ -25,7 +25,6 @@ using namespace std;
 
     int main() {
         ChessMatch* chessMatch = new ChessMatch();
-        vector<ChessPiece*> captured;
         int windowWidth = 1000;
         int windowHeight = 1000;
 
@@ -36,24 +35,25 @@ using namespace std;
 
         UI ui;
         while (!WindowShouldClose()) {
+            vector<vector<bool>> possibleMoves;
             ClearBackground(grey);
             BeginDrawing();
-            ui.Draw();
+            ui.Draw(possibleMoves);
             EndDrawing();
             try {
-                ChessPosition source = ui.SelectPosition();
+                ChessPosition source = ui.SelectPosition(possibleMoves);
                 cout << source.toString() << endl;
-
-                vector<vector<bool>> possibleMoves = chessMatch->possibleMoves(source);
-                // Dar uma forma de printar as regiões possíveis
-
-                ChessPosition target = ui.SelectPosition();
+                std::cout << "peça escolhida " << std::endl;
+                possibleMoves = chessMatch->possibleMoves(source);
                 
+                ChessPosition target = ui.SelectPosition(possibleMoves);
+
+                std::cout << "destino escolhido" << std::endl;
+
                 ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
                 ui.MovePiece(source, target);
                 //cout << "CRAWLLLL" << endl;
-                if (capturedPiece != nullptr) {
-                    captured.push_back(capturedPiece);
+                if (capturedPiece != nullptr){
                     ui.removePiece(capturedPiece);
                 }
 

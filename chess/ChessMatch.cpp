@@ -76,8 +76,8 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
     validateTargetPosition(from, to);
     ChessPiece* captured = dynamic_cast<ChessPiece*>(board.piece(to));;
     Piece* capturedPiece = makeMove(from, to);
-    std::cout << "1Captured(Piece) piece type: " << capturedPiece << std::endl;
-    std::cout << "1Captured(ChessPiece) piece type: " << captured << std::endl;
+    std::cout << "1 Captured(Piece) piece type: " << capturedPiece << std::endl;
+    std::cout << "1 Captured(ChessPiece) piece type: " << captured << std::endl;
 
 
     if (testCheck(currentPlayer)) {
@@ -299,11 +299,11 @@ void ChessMatch::validateTargetPosition(const Position& from, const Position& to
 
 void ChessMatch::nextTurn() {
     turn++;
-    currentPlayer = (currentPlayer == PieceColor::W ? PieceColor::W : PieceColor::W);
+    currentPlayer = (currentPlayer == PieceColor::W ? PieceColor::B : PieceColor::W);
 }
 
 PieceColor ChessMatch::opponent(PieceColor color) const {
-    return (color == PieceColor::W ? PieceColor::W : PieceColor::W);
+    return (color == PieceColor::W ? PieceColor::B : PieceColor::W);
 }
 
 ChessPiece* ChessMatch::king(PieceColor color) const {

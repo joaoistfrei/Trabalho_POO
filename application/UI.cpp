@@ -25,7 +25,7 @@ using namespace std;
 // }
 
 // void UI::printMatch(const ChessMatch* chessMatch, const vector<ChessPiece*>& captured) {
-//     printBoard(chessMatch->getPieces(), vector<vector<bool>>());
+//     printBoard(chessMatch->getPieces(), std::vector<std::vector<bool>>());
 //     cout << endl;
 //     printCapturedPieces(captured);
 //     cout << endl;
@@ -41,7 +41,7 @@ using namespace std;
 //     }
 // }
 
-// void UI::printBoard(const vector<vector<ChessPiece*>>& pieces, const vector<vector<bool>>& possibleMoves) {
+// void UI::printBoard(const vector<vector<ChessPiece*>>& pieces, const std::vector<std::vector<bool>>& possibleMoves) {
 //     for (vector<ChessPiece*>::size_type i = 0; i < pieces.size(); i++) {
 //         cout << 8 - i << " ";
 //         for (vector<ChessPiece*>::size_type j = 0; j < pieces[i].size(); j++) {
@@ -121,7 +121,7 @@ using namespace std;
 //     cout << endl;
 // }
 
-void UI::addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, int type, int color, float x, float y) {
+void UI::addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, int type, PieceColor color, float x, float y) {
     Vector2 pos = {x, y};
     PieceImage* piece = new PieceImage(type, color, pos);
     pieceList.push_back(std::make_pair(type, piece));
@@ -135,22 +135,22 @@ UI::UI() {
     // ADDING PAWNS
     for (int i = 0; i < 8; i++) {
         float xPos = MARGIN_SIZE + i * SQUARE_SIZE;
-        addPiece(_blackPieceList, PAWN, 0, xPos, yPosBlack);
-        addPiece(_whitePieceList, PAWN, 1, xPos, yPosWhite);
+        addPiece(_blackPieceList, PAWN, PieceColor::B, xPos, yPosBlack);
+        addPiece(_whitePieceList, PAWN, PieceColor::W, xPos, yPosWhite);
     }
 
     // ADDING OTHER PIECES
-    int colors[] = {0, 1}; // 0 -> Preto, 1 -> Branco
-    for (int color : colors) {
-        float yPos = MARGIN_SIZE + 7 * color * SQUARE_SIZE;
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), ROOK, color, MARGIN_SIZE, yPos);
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), ROOK, color, MARGIN_SIZE + 7 * SQUARE_SIZE, yPos);
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), KNIGHT, color, MARGIN_SIZE + SQUARE_SIZE, yPos);
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), KNIGHT, color, MARGIN_SIZE + 6 * SQUARE_SIZE, yPos);
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), BISHOP, color, MARGIN_SIZE + 2 * SQUARE_SIZE, yPos);
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), BISHOP, color, MARGIN_SIZE + 5 * SQUARE_SIZE, yPos);
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), QUEEN, color, MARGIN_SIZE + (3 + color) * SQUARE_SIZE, yPos);
-        addPiece((color == 0 ? _blackPieceList : _whitePieceList), KING, color, MARGIN_SIZE + (4 - color) * SQUARE_SIZE, yPos);
+    PieceColor colors[] = {PieceColor::B, PieceColor::W}; // 0 -> Preto, 1 -> Branco
+    for (PieceColor color : colors) {
+        float yPos = MARGIN_SIZE + 7 * static_cast<int>(color) * SQUARE_SIZE;
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), ROOK, color, MARGIN_SIZE, yPos);
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), ROOK, color, MARGIN_SIZE + 7 * SQUARE_SIZE, yPos);
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), KNIGHT, color, MARGIN_SIZE + SQUARE_SIZE, yPos);
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), KNIGHT, color, MARGIN_SIZE + 6 * SQUARE_SIZE, yPos);
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), BISHOP, color, MARGIN_SIZE + 2 * SQUARE_SIZE, yPos);
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), BISHOP, color, MARGIN_SIZE + 5 * SQUARE_SIZE, yPos);
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), QUEEN, color, MARGIN_SIZE + (3 + static_cast<int>(color)) * SQUARE_SIZE, yPos);
+        addPiece((color == PieceColor::B ? _blackPieceList : _whitePieceList), KING, color, MARGIN_SIZE + (4 - static_cast<int>(color)) * SQUARE_SIZE, yPos);
     }
 }
 
@@ -158,8 +158,8 @@ UI::UI() {
 UI::~UI(){
 }
 
-void UI::Draw(){
-    DrawChessBoard();
+void UI::Draw(std::vector<std::vector<bool>> possibleMoves){
+    DrawChessBoard(possibleMoves);
     for(auto it = _blackPieceList.begin(); it != _blackPieceList.end(); it++)
         it->second->Draw();
     for(auto it = _whitePieceList.begin(); it != _whitePieceList.end(); it++)
@@ -173,24 +173,44 @@ void UI::Draw(){
 void UI::Update(){
 }
 
-ChessPosition UI::SelectPosition(){
-    Vector2 mousePos = {0, 0};
-    while(!IsMouseButtonPressed(0)){
-        std::cout << "esperando clique" << std::endl;
-    }   
-    mousePos = GetMousePosition();
-    mousePos.x = static_cast<int>((mousePos.x - MARGIN_SIZE)/SQUARE_SIZE);
-    mousePos.y = static_cast<int>((mousePos.y - MARGIN_SIZE)/SQUARE_SIZE);
-    return ChessPosition('a' + mousePos.x, mousePos.y + 1);
-    
-    
+ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves) {
+    Color grey = {29, 29, 30, 255};
+    while (!WindowShouldClose()) { // Loop bloqueante, mas não fecha a janela
+        BeginDrawing();
+        ClearBackground(grey);
+
+        this->Draw(possibleMoves);
+        // DrawText("Click on a square to select a position", 10, 10, 20, RAYWHITE);
+
+        EndDrawing();
+
+        if (IsMouseButtonPressed(0)) { // Verifica se houve clique
+            Vector2 mousePos = GetMousePosition();
+
+            int column = static_cast<int>((mousePos.x - MARGIN_SIZE) / SQUARE_SIZE);
+            int row = static_cast<int>((mousePos.y - MARGIN_SIZE) / SQUARE_SIZE);
+
+            if (column >= 0 && column < 8 && row >= 0 && row < 8) {
+                return ChessPosition('a' + column, 8 - row); // Retorna posição válida
+            } else {
+                std::cerr << "Click outside the board boundaries. Try again." << std::endl;
+            }
+        }
+    }
+
+    // Se a janela for fechada, lançamos uma exceção ou retornamos uma posição especial
+    throw std::runtime_error("Window closed while waiting for user input.");
 }
 
-PieceImage* UI::findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList) {
+
+
+PieceImage* UI::findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList){
     for (auto& piece : pieceList) {
-        ChessPosition piecePos(static_cast<int>(piece.second->getPosition().x / SQUARE_SIZE), 
-                               static_cast<int>(piece.second->getPosition().y / SQUARE_SIZE));
-        if (piecePos.getColumn() == position.getColumn() || piecePos.getRow() == piecePos.getRow()) {
+        int pieceColumn = static_cast<int>((piece.second->getPosition().x - MARGIN_SIZE)  / SQUARE_SIZE);
+        int pieceRow = static_cast<int>((piece.second->getPosition().y - MARGIN_SIZE) / SQUARE_SIZE);
+
+        ChessPosition piecePos(pieceColumn + 'a', 8 - pieceRow);
+        if (piecePos.getColumn() == position.getColumn() && piecePos.getRow() == position.getRow()){
             return piece.second;
         }
     }
@@ -204,49 +224,53 @@ void UI::MovePiece(const ChessPosition& source, const ChessPosition& target) {
     }
 
     if (piece) {
-        piece->MoveTo({MARGIN_SIZE + SQUARE_SIZE * (target.getColumn() - 'a'), 
-                       MARGIN_SIZE + SQUARE_SIZE * target.getRow()});
+        piece->MoveTo({static_cast<float>(target.getColumn() - 'a'), static_cast<float>(8 - target.getRow())});
     }
 }
 
 
-void UI::removePiece(ChessPiece* capturedPiece){
-    Position capturedPos = capturedPiece->getPosition();
-    bool color = capturedPiece->getColor() == PieceColor::W;
-    if(color){
-        for(auto it = _whitePieceList.begin(); it != _whitePieceList.end(); it++){
-            Vector2 pieceVector = it->second->getPosition();
-            Position piecePos(static_cast<int>(pieceVector.x/SQUARE_SIZE), static_cast<int>(pieceVector.y/SQUARE_SIZE));
-            if(piecePos.getColumn() == capturedPos.getColumn() && piecePos.getRow() == capturedPos.getRow()){
-                _whitePieceList.erase(it);
-                addToRemovedList(it->first, color);
-                break;
-            }
+void UI::removePieceFromList(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList, PieceColor color){
+    for (auto it = pieceList.begin(); it != pieceList.end(); ++it) {
+        int pieceColumn = static_cast<int>((it->second->getPosition().x - MARGIN_SIZE)  / SQUARE_SIZE);
+        int pieceRow = static_cast<int>((it->second->getPosition().y - MARGIN_SIZE) / SQUARE_SIZE);
+
+        ChessPosition piecePos(pieceColumn + 'a', 8 - pieceRow);
+        if (piecePos.getColumn() == position.getColumn() && piecePos.getRow() == piecePos.getRow()) {
+            addToRemovedList(it->first, color);
+            delete it->second;
+            pieceList.erase(it);
+            break;
         }
+    }
+}
+
+void UI::removePiece(ChessPiece* capturedPiece) {
+    // std::cout << "removePiece(): ENTROU AQUI " << std::endl;
+    // std::cout << "(" << capturedPiece->getPosition().getColumn() << ", " << capturedPiece->getPosition().getRow() << ")" << std::endl;
+    ChessPosition capturedPos = ChessPosition(capturedPiece->getPosition().getColumn() + 'a', 8 - capturedPiece->getPosition().getRow());
+    PieceColor color = capturedPiece->getColor();
+
+    std::cout << "removePiece(): " << static_cast<int>(color) <<" (" << capturedPos.getColumn() << ", " << capturedPos.getRow() << ")" << std::endl;
+
+    if (color == PieceColor::W) {
+        removePieceFromList(capturedPos, _whitePieceList, color);
     } else {
-        for(auto it = _blackPieceList.begin(); it != _blackPieceList.end(); it++){
-            Vector2 pieceVector = it->second->getPosition();
-            Position piecePos(static_cast<int>(pieceVector.x/SQUARE_SIZE), static_cast<int>(pieceVector.y/SQUARE_SIZE));
-            if(piecePos.getColumn() == capturedPos.getColumn() && piecePos.getRow() == capturedPos.getRow()){
-                _blackPieceList.erase(it);
-                addToRemovedList(it->first, color);
-                break;
-            }
-        }
+        removePieceFromList(capturedPos, _blackPieceList, color);
     }
 }
 
-void UI::addToRemovedList(int p, bool color){
+
+void UI::addToRemovedList(int p, PieceColor color){
     PieceImage* piece;
     Vector2 pos;
-    if(color){
+    if(color == PieceColor::W){
         pos.x = MARGIN_SIZE + _whitePieceList.size();
         pos.y = MARGIN_SIZE/2;
         piece = new PieceImage(p, color, pos, true);
         _whiteRemovedList.push_back(std::make_pair(p, piece));
     } else {
-        pos.x = MARGIN_SIZE + _whitePieceList.size();
-        pos.y = MARGIN_SIZE/2 + 8*SQUARE_SIZE;
+        pos.x = MARGIN_SIZE + _whitePieceList.size() - 1;
+        pos.y = MARGIN_SIZE + 8*SQUARE_SIZE;
         piece = new PieceImage(p, color, pos, true);
         _whiteRemovedList.push_back(std::make_pair(p, piece));
     }
@@ -298,7 +322,7 @@ std::string UI::getSelectedPosString(){
     return res;
 }
 
-void UI::DrawChessBoard() {
+void UI::DrawChessBoard(std::vector<std::vector<bool>> possibleMoves) {
     const int boardSize = 8;
     const float squareSize = SQUARE_SIZE; // Size of each square in pixels
     const float marginSize = MARGIN_SIZE;  // Margin around the board in pixels
@@ -307,46 +331,51 @@ void UI::DrawChessBoard() {
         for (int y = 0; y < boardSize; y++) {
             Color color = ((x + y) % 2 == 0) ? DARKGRAY : RAYWHITE;
             DrawRectangle(x * squareSize + marginSize, y * squareSize + marginSize, squareSize, squareSize, color);
+             if ((not possibleMoves.empty()) && possibleMoves[x][y]) {
+                Rectangle square = { y * squareSize + marginSize, x * squareSize + marginSize, squareSize, squareSize };
+                DrawRectangleLinesEx(square, 10.0f, RED);
+            }
         }
     }
 }
 
 
-PieceImage::PieceImage(int piece, int color, Vector2 pos, bool removed){
+PieceImage::PieceImage(int piece, PieceColor color, Vector2 pos, bool removed){
+    bool white = color == PieceColor::W;
     Image img;
     switch (piece){
         case PAWN:{
-            if(color)
+            if(white)
                 img = LoadImage("../Images/WhitePawn.png");
             else
                 img = LoadImage("../Images/BlackPawn.png");            
         } break;
         case ROOK:{
-            if(color)
+            if(white)
                 img = LoadImage("../Images/WhiteRook.png");
             else
                 img = LoadImage("../Images/BlackRook.png");            
         } break;
         case KNIGHT:{
-            if(color)
+            if(white)
                 img = LoadImage("../Images/WhiteKnight.png");
             else
                 img = LoadImage("../Images/BlackKnight.png");            
         } break;
         case BISHOP:{
-            if(color)
+            if(white)
                 img = LoadImage("../Images/WhiteBishop.png");
             else
                 img = LoadImage("../Images/BlackBishop.png");            
         } break;
         case QUEEN:{
-            if(color)
+            if(white)
                 img = LoadImage("../Images/WhiteQueen.png");
             else
                 img = LoadImage("../Images/BlackQueen.png");            
         } break;
         case KING:{
-            if(color)
+            if(white)
                 img = LoadImage("../Images/WhiteKing.png");
             else
                 img = LoadImage("../Images/BlackKing.png");            
@@ -381,8 +410,8 @@ Vector2 PieceImage::getPosition(){
     return pos;
 }
 
-void PieceImage::MoveTo(Vector2 mousePos){
-    position.x = mousePos.x*SQUARE_SIZE + (SQUARE_SIZE - image.width)/2;
-    position.y = mousePos.y*SQUARE_SIZE;
+void PieceImage::MoveTo(Vector2 targetPos){
+    position.x = MARGIN_SIZE + targetPos.x*SQUARE_SIZE + (SQUARE_SIZE - image.width)/2;
+    position.y = MARGIN_SIZE+ targetPos.y*SQUARE_SIZE;
 }
 

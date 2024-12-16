@@ -39,10 +39,10 @@ enum Pieces{
 
 class PieceImage{
     public:
-        PieceImage(int piece = 0, int color = 0, Vector2 pos = {0,0}, bool removed = false);
+        PieceImage(int piece = 0, PieceColor color = PieceColor::B, Vector2 pos = {0,0}, bool removed = false);
         ~PieceImage();
         void Draw();
-        void MoveTo(Vector2 mousePos);
+        void MoveTo(Vector2 targetPos);
         Vector2 getPosition();
         int getImageWidth(){ return image.width; }
     
@@ -56,10 +56,10 @@ class UI{
     public:
         UI();
         ~UI();
-        void addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, int type, int color, float x, float y);
-        void Draw();
+        void addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, int type, PieceColor color, float x, float y);
+        void Draw(std::vector<std::vector<bool>> possibleMoves);
         void Update();
-        ChessPosition SelectPosition();
+        ChessPosition SelectPosition(std::vector<std::vector<bool>> possibleMoves);
         void MovePiece(const ChessPosition& source, const ChessPosition& target);
         PieceImage* findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList);
         int PieceMouseSelect(Vector2 mousePos);
@@ -67,13 +67,14 @@ class UI{
         std::string getSelectedPosString();
         void setTurn(bool t){ turn = t; }
         void removePiece(ChessPiece* capturedPiece);
-        void addToRemovedList(int p, bool color);
+        void removePieceFromList(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList, PieceColor color);
+        void addToRemovedList(int p, PieceColor color);
 
         //void StartScreen();
 
         const Vector2 invalidPos = {-1, -1};
     private:
-        void DrawChessBoard();
+        void DrawChessBoard(std::vector<std::vector<bool>> possibleMoves);
         bool turn; // 0 = black, 1 = white
         std::vector<std::pair<int, PieceImage*>> _whitePieceList;
         std::vector<std::pair<int, PieceImage*>> _blackPieceList;
