@@ -6,11 +6,13 @@ std::string Rook::toString() const {
     return "R"; // Representação da peça Rook
 }
 
+// método canMove, verifica se a peça pode se mover para a posição passada como argumento
 bool Rook::canMove(Position position) const {
     ChessPiece* p = dynamic_cast<ChessPiece*>(getBoard()->piece(position));
     return (p == nullptr || p->getColor() != getColor());
 }
 
+// método possibleMoves, retorna uma matriz de booleanos que indica as posições possíveis para a peça
 std::vector<std::vector<bool>> Rook::possibleMoves() const {
     std::vector<std::vector<bool>> mat(getBoard()->getRows(), std::vector<bool>(getBoard()->getColumns(), false));
     Position p(0, 0);

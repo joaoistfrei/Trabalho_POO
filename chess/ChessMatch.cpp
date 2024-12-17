@@ -13,16 +13,19 @@
 #include <stdexcept>
 #include <iostream>
 
+// Função para iniciar a partida com as propriedades desejadas (tabuleiro, turno, jogador atual, etc)
 ChessMatch::ChessMatch() : board(8, 8), turn(1), currentPlayer(PieceColor::W), check(false), checkMate(false), enPassantVulnerable(nullptr), promoted(nullptr), castling(0), enPassantCompleted(false) {
     initialSetup();
 }
 
+// Função para removar uma peça do tabuleiro
 void ChessMatch::remove(Piece* piece) {
     std::cout << "Removendo peça" << piece << std::endl;
     piecesOnTheBoard.remove_if([piece](const std::unique_ptr<Piece>& p) { return p.get() == piece; });
     std::cout << "Removida peça" << piece << std::endl;
 }
 
+// getters
 int ChessMatch::getTurn() const {
     return turn;
 }
@@ -57,28 +60,28 @@ std::vector<std::vector<ChessPiece*>> ChessMatch::getPieces() const {
     return mat;
 }
 
+// funcao para ver quais sao os possiveis movimentos de uma peca escolhida
 std::vector<std::vector<bool>> ChessMatch::possibleMoves(const ChessPosition& sourcePosition) const {
     Position position = sourcePosition.toPosition();
     validateSourcePosition(position);
-    //std::cout << "TESTE" << std::endl;
     return board.piece(position)->possibleMoves();
 }
 
-
-
-
-
-
+// funcao para mover uma peca no tabuleiro
 ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, const ChessPosition& toPosition) {
+    //transforma as posicoes de entrada de xadrez em posicoes matriciais
     Position from = fromPosition.toPosition();
     Position to = toPosition.toPosition();
+
+    // verifica se as posicoes sao validas
     validateSourcePosition(from);
     validateTargetPosition(from, to);
+
+    // realiza o movimento da peca
     ChessPiece* captured = dynamic_cast<ChessPiece*>(board.piece(to));
     Piece* capturedPiece = makeMove(from, to);
-    std::cout << "1 Captured(Piece) piece type: " << capturedPiece << std::endl;
-    std::cout << "1 Captured(ChessPiece) piece type: " << captured << std::endl;
 
+    // verifica se o rei esta em estado de cheque
     if (testCheck(currentPlayer)) {
         undoMove(from, to, capturedPiece);
         throw ChessException("You can't place yourself in check!");
@@ -86,7 +89,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
 
     ChessPiece* movedPiece = dynamic_cast<ChessPiece*>(board.piece(to));
 
-    // Promotion
+    // analisa promocao de peao
     promoted = nullptr;
     if (dynamic_cast<Pawn*>(movedPiece)) {
         if ((movedPiece->getColor() == PieceColor::W && to.getRow() == 0) || (movedPiece->getColor() == PieceColor::B && to.getRow() == 7)) {
@@ -94,6 +97,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
         }
     }
 
+    // analisa en passant
     if(enPassantCompleted){
         Position enPassantPos(to.getRow(), to.getColumn());
         enPassantPos.setRow(enPassantPos.getRow() + (currentPlayer == PieceColor::W ? 1 : -1));
@@ -103,18 +107,19 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
             capturedPieces.push_back(std::unique_ptr<ChessPiece>(captured));
             remove(captured);
         }
-   }
+    }
 
-
+    // verifica cheque de novo
     check = testCheck(opponent(currentPlayer));
 
+    // verifica cheque mate
     if (testCheckMate(opponent(currentPlayer))) {
         checkMate = true;
     } else {
         nextTurn();
     }
 
-    // En passant
+    // se for o caso, coloca o peao como vulneravel ao en passant
     if (dynamic_cast<Pawn*>(movedPiece) && (to.getRow() == from.getRow() + 2 || to.getRow() == from.getRow() - 2)) {
         enPassantVulnerable = movedPiece;
     } else {
@@ -124,6 +129,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
     return captured;
 }
 
+// quando um peao eh promovido, escolhe qual peca vai ser posta no lugar
 ChessPiece* ChessMatch::replacePromotedPiece(const std::string& type) {
     if (promoted == nullptr) {
         throw std::logic_error("There is no piece to be promoted!");
@@ -143,6 +149,7 @@ ChessPiece* ChessMatch::replacePromotedPiece(const std::string& type) {
     return promoted;
 }
 
+// cria uma nova peca do xadrez, de acordo com o tipo e cor passados como argumento
 std::unique_ptr<ChessPiece> ChessMatch::createNewPiece(const std::string& type, PieceColor color) {
     if (type == "B") return std::make_unique<Bishop>(&board, color);
     if (type == "N") return std::make_unique<Knight>(&board, color);
@@ -150,29 +157,21 @@ std::unique_ptr<ChessPiece> ChessMatch::createNewPiece(const std::string& type, 
     return std::make_unique<Queen>(&board, color);
 }
 
-std::unique_ptr<ChessPiece> ChessMatch::newPiece(const std::string& type, PieceColor color) {
-    if (type == "B") return std::make_unique<Bishop>(&board, color);
-    if (type == "G") return std::make_unique<Knight>(&board, color);
-    if (type == "R") return std::make_unique<Rook>(&board, color);
-    return std::make_unique<Queen>(&board, color);
-}
-
-
-
-
-
-
-
-
-
+// funcao principal de movimentar pecas
 Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
+
+    // tira a peca da origem
     ChessPiece* p = dynamic_cast<ChessPiece*>(board.removePiece(source));
-    p->increaseMoveCount();
+    p->increaseMoveCount(); // aumenta o numero de movimentos 
+
+    // remove a peca que estava no destino e salva em capturedPiece
     Piece* capturedPiece = board.removePiece(target);
     std::cout << "Captured piece type: " << capturedPiece << std::endl;
+
+    // coloca a peca movida no destino
     board.placePiece(p, target);
 
-    // Castling kingside
+    // castling kingside
     if (dynamic_cast<King*>(p) && target.getColumn() == source.getColumn() + 2) {
         Position sourceT(source.getRow(), source.getColumn() + 3);
         Position targetT(source.getRow(), source.getColumn() + 1);
@@ -182,7 +181,7 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
         castling = 1;
     }
 
-    // Castling queenside
+    // castling queenside
     else if (dynamic_cast<King*>(p) && target.getColumn() == source.getColumn() - 2) {
         Position sourceT(source.getRow(), source.getColumn() - 4);
         Position targetT(source.getRow(), source.getColumn() - 1);
@@ -193,7 +192,7 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
     } else 
         castling = 0;
 
-    // En passant
+    // en passant
     if (dynamic_cast<Pawn*>(p)) {
         if (source.getColumn() != target.getColumn() && capturedPiece == nullptr) {
             Position pawnPos;
@@ -206,20 +205,26 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
     return capturedPiece;
 }
 
+// desfaz o movimento no caso de movimento ilegal
 void ChessMatch::undoMove(const Position& source, const Position& target, Piece* captured) {
+    // remove peca do destino
     ChessPiece* p = dynamic_cast<ChessPiece*>(board.removePiece(target));
+    // diminui numero de movimentos
     p->decreaseMoveCount();
+
+    // volta com a peca para o lugar
     board.placePiece(p, source);
 
+    // se houver capturado uma peca, voltar com ela p lugar
     if (captured != nullptr) {
         board.placePiece(captured, target);
         capturedPieces.erase(std::remove_if(capturedPieces.begin(), capturedPieces.end(),
                                             [captured](const std::unique_ptr<Piece>& piece) { return piece.get() == captured; }),
-                             capturedPieces.end());
+                                            capturedPieces.end());
         piecesOnTheBoard.push_back(std::unique_ptr<Piece>(captured));
     }
 
-    // Castling kingside
+    // castling kingside
     if (dynamic_cast<King*>(p) && target.getColumn() == source.getColumn() + 2) {
         Position sourceT(source.getRow(), source.getColumn() + 3);
         Position targetT(source.getRow(), source.getColumn() + 1);
@@ -227,7 +232,7 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
         board.placePiece(rook, sourceT);
         rook->decreaseMoveCount();
     }
-    // Castling queenside
+    // castling queenside
     if (dynamic_cast<King*>(p) && target.getColumn() == source.getColumn() - 2) {
         Position sourceT(source.getRow(), source.getColumn() - 4);
         Position targetT(source.getRow(), source.getColumn() - 1);
@@ -236,7 +241,7 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
         rook->decreaseMoveCount();
     }
 
-    // En passant
+    // en passant
     if (dynamic_cast<Pawn*>(p)) {
         if (source.getColumn() != target.getColumn() && captured == enPassantVulnerable) {
             ChessPiece* pawn = dynamic_cast<ChessPiece*>(board.removePiece(target));
@@ -252,39 +257,38 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
     }
 }
 
+// validar posicao de origem
 void ChessMatch::validateSourcePosition(const Position& position) const {
-    std::cout << "TESTE1" << std::endl;
     if (!board.thereIsAPiece(position)) {
         throw ChessException("Error moving piece! Source position empty!");
     }
-        std::cout << "TESTE2" << std::endl;
     if (currentPlayer != dynamic_cast<ChessPiece*>(board.piece(position))->getColor()) {
         throw ChessException("Chosen piece is not yours!");
     }
-        std::cout << "TESTE3" << std::endl;
-
     if (!board.piece(position)->isThereAnyPossibleMove()) {
         throw ChessException("There is no possible move for chosen piece!");
     }
-        std::cout << "TESTE4" << std::endl;
-
 }
 
+// validar posicao de destino
 void ChessMatch::validateTargetPosition(const Position& from, const Position& to) const {
     if (!board.piece(from)->possibleMove(to)) {
         throw ChessException("The chosen piece can't move to target position!");
     }
 }
 
+// muda o turno
 void ChessMatch::nextTurn() {
     turn++;
     currentPlayer = (currentPlayer == PieceColor::W ? PieceColor::B : PieceColor::W);
 }
 
+// retorna a cor do oponente
 PieceColor ChessMatch::opponent(PieceColor color) const {
     return (color == PieceColor::W ? PieceColor::B : PieceColor::W);
 }
 
+// retorna um ponteiro pro rei de uma cor
 ChessPiece* ChessMatch::king(PieceColor color) const {
     for (const auto& piece : piecesOnTheBoard) {
         ChessPiece* chessPiece = dynamic_cast<ChessPiece*>(piece.get());
@@ -296,9 +300,9 @@ ChessPiece* ChessMatch::king(PieceColor color) const {
     throw std::logic_error("There is no " + std::to_string(static_cast<int>(color)) + " king on the board!");
 }
 
+// verifica se o rei de uma cor esta em cheque
 bool ChessMatch::testCheck(PieceColor color) const {
     Position kingPosition = king(color)->getChessPosition().toPosition();
-    std::cout << "TESTE CHECKKKKK" << std::endl;
     for (const auto& piece : piecesOnTheBoard) {
         ChessPiece* opponentPiece = dynamic_cast<ChessPiece*>(piece.get());
         if (opponentPiece->getColor() == opponent(color)) {
@@ -311,6 +315,7 @@ bool ChessMatch::testCheck(PieceColor color) const {
     return false;
 }
 
+// testa se esta em cheque e se tem algum movimento que possa tirar do cheque (caso contrario, cheque mate)
 bool ChessMatch::testCheckMate(PieceColor color) const {
     if (!testCheck(color)) {
         return false;
@@ -338,11 +343,13 @@ bool ChessMatch::testCheckMate(PieceColor color) const {
     return true;
 }
 
+// coloca uma peca no tabuleiro
 void ChessMatch::placeNewPiece(char column, int row, std::unique_ptr<ChessPiece> piece) {
     board.placePiece(piece.get(), ChessPosition(column, row).toPosition());
     piecesOnTheBoard.push_back(std::move(piece));
 }
 
+// coloca as pecas como comumente se colocam no xadrez (aqui poderiamos colocar quaisquer pecas onde quisermos)
 void ChessMatch::initialSetup() {
     // Rook
     placeNewPiece('a', 1, std::make_unique<Rook>(&board, PieceColor::W));

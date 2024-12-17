@@ -314,42 +314,42 @@ PieceImage::PieceImage(int piece, PieceColor color, Vector2 pos, int format){
     switch (piece){
         case PAWN:{
             if(white)
-                img = LoadImage("../Images/WhitePawn.png");
+                img = LoadImage("Images/WhitePawn.png");
             else
-                img = LoadImage("../Images/BlackPawn.png");            
+                img = LoadImage("Images/BlackPawn.png");            
         } break;
         case ROOK:{
             if(white)
-                img = LoadImage("../Images/WhiteRook.png");
+                img = LoadImage("Images/WhiteRook.png");
             else
-                img = LoadImage("../Images/BlackRook.png");            
+                img = LoadImage("Images/BlackRook.png");            
         } break;
         case KNIGHT:{
             if(white)
-                img = LoadImage("../Images/WhiteKnight.png");
+                img = LoadImage("Images/WhiteKnight.png");
             else
-                img = LoadImage("../Images/BlackKnight.png");            
+                img = LoadImage("Images/BlackKnight.png");            
         } break;
         case BISHOP:{
             if(white)
-                img = LoadImage("../Images/WhiteBishop.png");
+                img = LoadImage("Images/WhiteBishop.png");
             else
-                img = LoadImage("../Images/BlackBishop.png");            
+                img = LoadImage("Images/BlackBishop.png");            
         } break;
         case QUEEN:{
             if(white)
-                img = LoadImage("../Images/WhiteQueen.png");
+                img = LoadImage("Images/WhiteQueen.png");
             else
-                img = LoadImage("../Images/BlackQueen.png");            
+                img = LoadImage("Images/BlackQueen.png");            
         } break;
         case KING:{
             if(white)
-                img = LoadImage("../Images/WhiteKing.png");
+                img = LoadImage("Images/WhiteKing.png");
             else
-                img = LoadImage("../Images/BlackKing.png");            
+                img = LoadImage("Images/BlackKing.png");            
         } break;
         default:{
-            img = LoadImage("../Images/Pawn.png"); 
+            img = LoadImage("Images/Pawn.png"); 
         }break;
     }
     if(format == 0){

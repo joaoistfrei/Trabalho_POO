@@ -5,6 +5,7 @@ Position::Position() : row(0), column(0) {}
 
 Position::Position(int row, int column) : row(row), column(column) {}
 
+// getters
 int Position::getRow() const {
     return row;
 }
@@ -13,6 +14,7 @@ int Position::getColumn() const {
     return column;
 }
 
+// setters
 void Position::setRow(int row) {
     this->row = row;
 }

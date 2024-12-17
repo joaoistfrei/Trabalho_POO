@@ -1,12 +1,15 @@
 #include "../../include/Pawn.h"
 #include "../../include/ChessMatch.h"
 
+
+// o peao tambem precisa ter acesso ao jogo, para poder julgar a possibilidade de en passant
 Pawn::Pawn(Board* board, PieceColor color, ChessMatch* chessMatch) : ChessPiece(board, color), chessMatch(chessMatch) {}
 
 std::string Pawn::toString() const {
     return "P"; // Representação da peça Rook
 }
 
+// método canMove, verifica se a peça pode se mover para a posição passada como argumento
 std::vector<std::vector<bool>> Pawn::possibleMoves() const {
     std::vector<std::vector<bool>> mat(getBoard()->getRows(), std::vector<bool>(getBoard()->getColumns(), false));
     Position p(0, 0);
