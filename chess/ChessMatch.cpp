@@ -104,7 +104,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
         capturedPiece = board.removePiece(enPassantPos);
         captured = dynamic_cast<ChessPiece*>(capturedPiece);
         if (captured != nullptr) {
-            capturedPieces.push_back(std::unique_ptr<ChessPiece>(captured));
+            capturedPieces.push_back(std::unique_ptr<Piece>(std::move(capturedPiece)));
             remove(captured);
         }
     }
@@ -115,10 +115,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
     // verifica cheque mate
     if (testCheckMate(opponent(currentPlayer))) {
         checkMate = true;
-    } else {
-        nextTurn();
-    }
-
+    } 
     // se for o caso, coloca o peao como vulneravel ao en passant
     if (dynamic_cast<Pawn*>(movedPiece) && (to.getRow() == from.getRow() + 2 || to.getRow() == from.getRow() - 2)) {
         enPassantVulnerable = movedPiece;
@@ -166,6 +163,7 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
 
     // remove a peca que estava no destino e salva em capturedPiece
     Piece* capturedPiece = board.removePiece(target);
+    
     std::cout << "Captured piece type: " << capturedPiece << std::endl;
 
     // coloca a peca movida no destino
@@ -202,6 +200,25 @@ Piece* ChessMatch::makeMove(const Position& source, const Position& target) {
             enPassantCompleted = false;
     }
 
+    if (capturedPiece != nullptr) {
+        // Encontrando o unique_ptr correspondente em piecesOnTheBoard
+        auto it = std::find_if(piecesOnTheBoard.begin(), piecesOnTheBoard.end(),
+                            [capturedPiece](const std::unique_ptr<Piece>& p) { return p.get() == capturedPiece; });
+
+        if (it != piecesOnTheBoard.end()) {
+            // Movendo o unique_ptr encontrado para capturar a ownership
+            std::unique_ptr<Piece> newPiece = std::move(*it);  // Move o unique_ptr para 'newPiece'
+            
+            // Remove o unique_ptr da lista
+            piecesOnTheBoard.erase(it);
+            
+            // Adiciona o objeto à lista capturedPieces (movendo a ownership)
+            capturedPieces.push_back(std::move(newPiece));  // Move ownership para capturedPieces
+        }
+    }
+
+
+
     return capturedPiece;
 }
 
@@ -217,11 +234,16 @@ void ChessMatch::undoMove(const Position& source, const Position& target, Piece*
 
     // se houver capturado uma peca, voltar com ela p lugar
     if (captured != nullptr) {
-        board.placePiece(captured, target);
-        capturedPieces.erase(std::remove_if(capturedPieces.begin(), capturedPieces.end(),
-                                            [captured](const std::unique_ptr<Piece>& piece) { return piece.get() == captured; }),
-                                            capturedPieces.end());
-        piecesOnTheBoard.push_back(std::unique_ptr<Piece>(captured));
+        auto it = std::find_if(capturedPieces.begin(), capturedPieces.end(),
+                       [captured](const std::unique_ptr<Piece>& piece) {
+                           return piece.get() == captured;
+                        });
+        if(it != capturedPieces.end()){
+            std::unique_ptr<Piece> newPtr = std::move(*it);
+            board.placePiece(newPtr.get(), target);
+            piecesOnTheBoard.push_back(std::move(newPtr));
+            capturedPieces.erase(it);
+        }
     }
 
     // castling kingside
@@ -306,6 +328,8 @@ bool ChessMatch::testCheck(PieceColor color) const {
     for (const auto& piece : piecesOnTheBoard) {
         ChessPiece* opponentPiece = dynamic_cast<ChessPiece*>(piece.get());
         if (opponentPiece->getColor() == opponent(color)) {
+            if(!board.thereIsAPiece(opponentPiece->getPosition()))
+            continue;
             std::vector<std::vector<bool>> mat = opponentPiece->possibleMoves();
             if (mat[kingPosition.getRow()][kingPosition.getColumn()]) {
                 return true;
@@ -322,6 +346,8 @@ bool ChessMatch::testCheckMate(PieceColor color) const {
     }
     for (const auto& piece : piecesOnTheBoard) {
         ChessPiece* chessPiece = dynamic_cast<ChessPiece*>(piece.get());
+        if(!board.thereIsAPiece(chessPiece->getPosition()))
+            continue;
         if (chessPiece->getColor() == color) {
             std::vector<std::vector<bool>> mat = chessPiece->possibleMoves();
             for (int i = 0; i < board.getRows(); ++i) {

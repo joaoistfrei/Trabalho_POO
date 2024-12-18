@@ -10,23 +10,6 @@
 
 #include <raylib.h>
 
-// class UI {
-// public:
-//     static void clearScreen();
-//     static void printMatch(const ChessMatch* chessMatch, const std::vector<ChessPiece*>& captured);
-//     static void printBoard(const std::vector<std::vector<ChessPiece*>>& pieces, const std::vector<std::vector<bool>>& possibleMoves);
-//     static ChessPosition readChessPosition();
-// };
-
-// extern const std::string ANSI_CYAN;
-// extern const std::string ANSI_RESET;
-// extern const std::string ANSI_BLUE_BACKGROUND;
-// extern const std::string ANSI_WHITE;
-// extern const std::string ANSI_YELLOW;
-
-// void printPiece(const ChessPiece* piece, bool background);
-// void printCapturedPieces(const std::vector<ChessPiece*>& captured);
-
 enum Pieces{
     PAWN,
     ROOK,
@@ -57,9 +40,11 @@ class UI{
         UI();
         ~UI();
         void addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, Pieces type, PieceColor color, float x, float y, int format = 0);
-        void Draw(std::vector<std::vector<bool>> possibleMoves);
+        void Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player);
+        void DrawCheckMate(PieceColor player, bool& drawMenu);
+        bool DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player);
         void Update();
-        ChessPosition SelectPosition(std::vector<std::vector<bool>> possibleMoves);
+        ChessPosition SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu);
         void MovePiece(const ChessPosition& source, const ChessPosition& target, int isCastling);
         PieceImage* findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList);
         int PieceMouseSelect(Vector2 mousePos);
@@ -69,7 +54,7 @@ class UI{
         void addToRemovedList(int p, PieceColor color);
 
         void fillPromotionList(PieceColor color);
-        std::string selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves);
+        std::string selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves, PieceColor player);
         void replacePromotedPiece(ChessPosition pos, PieceColor color, Pieces type);
         Pieces toPieces(char piece);
 

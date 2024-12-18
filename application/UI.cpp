@@ -3,6 +3,7 @@
 #include "../include/ChessMatch.h"
 #include "../include/ChessPosition.h"
 #include "../include/Color.h"
+#include "../include/ChessException.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -13,6 +14,9 @@ using namespace std;
 
 #define SQUARE_SIZE 100.0f
 #define MARGIN_SIZE 100.0f
+#define OUTER_BOX_SIZE 100.0f
+#define NEWGAME_FONTSIZE 50
+#define PAUSEBUTTON_SIZE 60
 
 
 void UI::addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, Pieces type, PieceColor color, float x, float y, int format) {
@@ -61,7 +65,10 @@ UI::~UI(){
         delete pieces.second;
 }
 
-void UI::Draw(std::vector<std::vector<bool>> possibleMoves){
+void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
+    Rectangle pauseButton = {MARGIN_SIZE + 8*SQUARE_SIZE + (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2,
+                             (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2, PAUSEBUTTON_SIZE, PAUSEBUTTON_SIZE};
+    
     DrawChessBoard(possibleMoves);
     for(auto it = _blackPieceList.begin(); it != _blackPieceList.end(); it++)
         it->second->Draw();
@@ -79,33 +86,133 @@ void UI::Draw(std::vector<std::vector<bool>> possibleMoves){
         for(auto it = _promotionList.begin(); it != _promotionList.end(); it++)
             it->second->Draw(); 
     }
+    if(player == PieceColor::W){
+        int fontSize = 25;
+        Color cian = {104,168,222,255};
+        int textWidth = MeasureText("WHITE TURN", fontSize);
+        DrawText("WHITE TURN", GetScreenWidth() - textWidth - MARGIN_SIZE, (MARGIN_SIZE - fontSize)/2, fontSize, cian);
+    } else {
+        int fontSize = 25;
+        int textWidth = MeasureText("BLACK TURN", fontSize);
+        DrawText("BLACK TURN", GetScreenWidth() - textWidth - MARGIN_SIZE, (MARGIN_SIZE - fontSize)/2, fontSize, BLACK);
+    }
+    
+
+    DrawRectangleRounded(pauseButton, 0.1, 16, DARKGRAY);
+    for(int i = 0; i < 2; i ++){
+        Vector2 startPos = {pauseButton.x + 3 * PAUSEBUTTON_SIZE/10 + 2*i*PAUSEBUTTON_SIZE/5, pauseButton.y + 5};
+        Vector2 endPos = {pauseButton.x + 3 * PAUSEBUTTON_SIZE/10 + 2*i*PAUSEBUTTON_SIZE/5, pauseButton.y + PAUSEBUTTON_SIZE - 5};
+
+        DrawLineEx(startPos, endPos, pauseButton.width/5, WHITE);
+    }
 }
+
+void UI::DrawCheckMate(PieceColor player, bool& drawMenu){
+    int fontSize = 50;
+    int textWidth = MeasureText("WHITE WINS", fontSize);
+    int windowWidth = GetScreenWidth();
+    int windowHeight = GetScreenHeight();
+    int continueWidth = MeasureText("Click anywhere to continue!", 25);
+    Color cian = {104,168,222,255};
+    vector<vector<bool>> possibleMoves;
+    while(!WindowShouldClose()){
+        ClearBackground(GRAY);
+        BeginDrawing();
+        Draw(possibleMoves, player);
+        if(player == PieceColor::W){
+            DrawText("WHITE WINS", (windowWidth - textWidth)/2 , (windowHeight- fontSize)/2, fontSize, cian);
+        } else
+            DrawText("BLACK WINS", (windowWidth - textWidth)/2 , (windowHeight- fontSize)/2, fontSize, BLACK);
+
+        DrawText("Click anywhere to continue!", (windowWidth - continueWidth)/2, (windowWidth + fontSize + 35)/2, 25, RED);
+        if(IsMouseButtonPressed(0)){
+            drawMenu = true;
+            break;
+        }
+        EndDrawing();
+    }
+}
+
+bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
+    std::vector<std::vector<bool>> moves;
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    Rectangle outerBox = {screenWidth/2 - 2*OUTER_BOX_SIZE , (screenHeight - 3*OUTER_BOX_SIZE)/2, 4*OUTER_BOX_SIZE, 3*OUTER_BOX_SIZE};
+    int textWidth = MeasureText("CHESS", OUTER_BOX_SIZE);
+    int newGameWidth = MeasureText("New Game", NEWGAME_FONTSIZE);
+    Rectangle newgameBox = {static_cast<float>(screenWidth - newGameWidth - 20)/2, outerBox.y + outerBox.height - 110, 
+                            static_cast<float>(20 + newGameWidth), static_cast<float>(20 + NEWGAME_FONTSIZE)};
+    bool isInsideOuterBox;
+    bool isInsideNewgame;
+    while(!WindowShouldClose()){
+        Draw(moves, player);
+
+        DrawRectangleRounded(outerBox, 0.1, 16, GRAY);
+        DrawRectangleRoundedLines(outerBox, 0.1, 16, 5, BLACK);
+        DrawRectangleRounded(newgameBox, 0.1, 16, BEIGE);
+        
+        DrawText("CHESS", (screenWidth - textWidth)/2, (screenHeight - outerBox.y + 100)/2, 100, BLACK);
+        DrawText("New Game", (screenWidth - newGameWidth)/2, outerBox.y + outerBox.height - 100, 50, BLACK);
+        
+        if(IsMouseButtonPressed(0)){
+            Vector2 mousePos = GetMousePosition();
+            isInsideOuterBox = CheckCollisionPointRec(mousePos, outerBox);
+            if(isInsideOuterBox){
+                isInsideNewgame = CheckCollisionPointRec(mousePos, newgameBox);
+                if(isInsideNewgame)
+                    DrawRectangleRoundedLines(newgameBox, 0.1, 16, 2, BLACK);
+            }
+            break;
+        }
+        EndDrawing();
+    }
+    EndDrawing();
+    if(isInsideNewgame){
+        drawMenu = false;
+        return true;
+    }
+    if(isInsideOuterBox){
+        return false;
+    } 
+    if(isGameBeingPlayed)
+        drawMenu = false;
+    return false;
+}
+
 
 void UI::Update(){
 }
 
-ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves){
-    // Color grey = {29, 29, 30, 255};
+ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu){
+    Rectangle pauseButton = {MARGIN_SIZE + 8*SQUARE_SIZE + (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2,
+                            (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2, PAUSEBUTTON_SIZE, PAUSEBUTTON_SIZE};
     while (!WindowShouldClose()){ // Loop bloqueante, mas não fecha a janela
         BeginDrawing();
         ClearBackground(GRAY);
 
-        this->Draw(possibleMoves);
+        Draw(possibleMoves, player);
 
-        EndDrawing();
 
         if (IsMouseButtonPressed(0)){ // Verifica se houve clique
             Vector2 mousePos = GetMousePosition();
+
+            if(CheckCollisionPointRec(mousePos, pauseButton)){
+                drawMenu = true;
+                EndDrawing();
+                throw ChessException("Menu Opened!");
+            }
 
             int column = static_cast<int>((mousePos.x - MARGIN_SIZE) / SQUARE_SIZE);
             int row = static_cast<int>((mousePos.y - MARGIN_SIZE) / SQUARE_SIZE);
 
             if (column >= 0 && column < 8 && row >= 0 && row < 8) {
+                EndDrawing();
                 return ChessPosition('a' + column, 8 - row); // Retorna posição válida
             } else {
                 std::cerr << "Click outside the board boundaries. Try again." << std::endl;
             }
         }
+        EndDrawing();
     }
 
     // Se a janela for fechada, lançamos uma exceção ou retornamos uma posição especial
@@ -239,12 +346,12 @@ void UI::fillPromotionList(PieceColor color){
     addPiece(_promotionList, QUEEN, color, width/2 + 150, height/2 - 90, 2);
 }
 
-std::string UI::selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves){
+std::string UI::selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
     while (!WindowShouldClose()){ // Loop bloqueante, mas não fecha a janela
         BeginDrawing();
         ClearBackground(GRAY);
 
-        this->Draw(possibleMoves);
+        this->Draw(possibleMoves, player);
 
         EndDrawing();
 

@@ -24,47 +24,70 @@
 using namespace std;
 
     int main() {
-        ChessMatch* chessMatch = new ChessMatch();
+        ChessMatch* chessMatch = nullptr;
         int windowWidth = 1000;
         int windowHeight = 1000;
     
-        // Color grey = {29, 29, 30, 255};
-
+        bool drawMenu = true;
+        bool isGameBeingPlayed = false;
+        PieceColor player = PieceColor::W;
         InitWindow(windowWidth, windowHeight, "BetterChess BETA");
         SetTargetFPS(60);
 
-        UI ui;
-        while (!WindowShouldClose() || !chessMatch->getCheckMate()) {
+        UI* ui = new UI;
+        while(!WindowShouldClose()) {
             vector<vector<bool>> possibleMoves;
             ClearBackground(GRAY);
             BeginDrawing();
-            ui.Draw(possibleMoves);
+            ui->Draw(possibleMoves, player);
             EndDrawing();
+
+            if(chessMatch && chessMatch->getCheckMate()){
+                ui->DrawCheckMate(player, drawMenu);
+            }
+            
+            EndDrawing();
+
+            if(drawMenu){
+                bool startNewGame = ui->DrawMenu(isGameBeingPlayed, drawMenu, player);
+                if(startNewGame){
+                    if(chessMatch != nullptr)
+                        delete chessMatch;
+                    if(isGameBeingPlayed){
+                        delete ui;
+                        ui = new UI;
+                    }
+                    chessMatch = new ChessMatch;
+                }
+                continue;
+            }
             try {
-                ChessPosition source = ui.SelectPosition(possibleMoves);
+                player = chessMatch->getCurrentPlayer();
+                ChessPosition source = ui->SelectPosition(possibleMoves, player, drawMenu);
                 cout << source.toString() << endl;
 
                 possibleMoves = chessMatch->possibleMoves(source);
                 
-                ChessPosition target = ui.SelectPosition(possibleMoves);
+                ChessPosition target = ui->SelectPosition(possibleMoves, player, drawMenu);
 
                 std::cout << "destino escolhido" << std::endl;
 
                 ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
-                ui.MovePiece(source, target, chessMatch->getCastling());
+                ui->MovePiece(source, target, chessMatch->getCastling());
                 
                 if (capturedPiece != nullptr){
-                    ui.removePiece(capturedPiece);
+                    ui->removePiece(capturedPiece);
                 }
 
                 if (chessMatch->getPromoted() != nullptr) {
                     ChessPiece* promoPiece = chessMatch->getPromoted();
-                    ui.fillPromotionList(promoPiece->getColor());
-                    string promotionType = ui.selectPromotionPiece(possibleMoves);
+                    ui->fillPromotionList(promoPiece->getColor());
+                    string promotionType = ui->selectPromotionPiece(possibleMoves, player);
                     chessMatch->replacePromotedPiece(promotionType);
-
-                    ui.replacePromotedPiece(promoPiece->getChessPosition(), promoPiece->getColor(), ui.toPieces(promotionType[0]));
+                    ui->replacePromotedPiece(promoPiece->getChessPosition(), promoPiece->getColor(), ui->toPieces(promotionType[0]));
                 }
+                chessMatch->nextTurn();
+                isGameBeingPlayed = true;
             } catch (const ChessException& e) {
                 cout << e.what() << endl;
             } catch (const invalid_argument& e) {
