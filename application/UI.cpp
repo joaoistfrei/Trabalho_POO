@@ -293,12 +293,15 @@ void UI::removePieceFromList(const ChessPosition& position, std::vector<std::pai
     }
 }
 // Method to remove a piece from board
-void UI::removePiece(ChessPiece* capturedPiece) {
+void UI::removePiece(ChessPiece* capturedPiece, bool enPassantCompleted, ChessPosition target) {
     PieceColor color = capturedPiece->getColor();
     bool isWhite = (color == PieceColor::W ? true : false);
     ChessPosition capturedPos = ChessPosition(capturedPiece->getPosition().getColumn() + 'a', 8 - capturedPiece->getPosition().getRow());
 
     std::cout << "removePiece(): " << static_cast<int>(color) <<" (" << capturedPos.getColumn() << ", " << capturedPos.getRow() << ")" << std::endl;
+    if(enPassantCompleted && not capturedPiece->getBoard()->positionExists(capturedPiece->getPosition())){
+        capturedPos =  ChessPosition(target.getColumn(), target.getRow() + (capturedPiece->getColor() == PieceColor::W ? -1 : 1));
+    }
     // Chooses list from correct color
     if (isWhite) {
         removePieceFromList(capturedPos, _whitePieceList, color);

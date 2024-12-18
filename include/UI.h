@@ -48,7 +48,7 @@ class UI{
         PieceImage* findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList);
         int PieceMouseSelect(Vector2 mousePos);
         std::string getSelectedPosString();
-        void removePiece(ChessPiece* capturedPiece);
+        void removePiece(ChessPiece* capturedPiece, bool enPassantCompleted, ChessPosition target);
         void removePieceFromList(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList, PieceColor color);
         void addToRemovedList(int p, PieceColor color);
 

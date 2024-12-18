@@ -84,7 +84,7 @@ using namespace std;
                 ui->MovePiece(source, target, chessMatch->getCastling());
                 // Remove piece if there is a captured piece
                 if (capturedPiece != nullptr){
-                    ui->removePiece(capturedPiece);
+                    ui->removePiece(capturedPiece, chessMatch->getEnPassantCompleted(), target);
                 }
                 // If there is a promotion, draw options, get selected piece and replace in game and UI
                 if (chessMatch->getPromoted() != nullptr) {
