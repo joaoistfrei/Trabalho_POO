@@ -18,13 +18,13 @@ using namespace std;
 #define NEWGAME_FONTSIZE 50
 #define PAUSEBUTTON_SIZE 60
 
-
+// Method to add piece to a list
 void UI::addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, Pieces type, PieceColor color, float x, float y, int format) {
     Vector2 pos = {x, y};
     PieceImage* piece = new PieceImage(type, color, pos, format);
     pieceList.push_back(std::make_pair(type, piece));
 }
-
+// Constructor
 UI::UI() {
     float yPosBlack = MARGIN_SIZE + SQUARE_SIZE;
     float yPosWhite = MARGIN_SIZE + 6 * SQUARE_SIZE;
@@ -51,7 +51,7 @@ UI::UI() {
     }
 }
 
-
+// Destructor
 UI::~UI(){
     for(auto pieces : _blackPieceList)
         delete pieces.second;
@@ -64,11 +64,11 @@ UI::~UI(){
     for(auto pieces : _promotionList)
         delete pieces.second;
 }
-
+// Draw method
 void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
     Rectangle pauseButton = {MARGIN_SIZE + 8*SQUARE_SIZE + (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2,
                              (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2, PAUSEBUTTON_SIZE, PAUSEBUTTON_SIZE};
-    
+    // Draw chessboard and pieces on list
     DrawChessBoard(possibleMoves);
     for(auto it = _blackPieceList.begin(); it != _blackPieceList.end(); it++)
         it->second->Draw();
@@ -78,6 +78,7 @@ void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
         it->second->Draw();
     for(auto it = _whiteRemovedList.begin(); it != _whiteRemovedList.end(); it++)
         it->second->Draw(); 
+    // If there are elements on promotion list, draw selection screen
     if(not _promotionList.empty()){
         int width = GetScreenWidth();
         int height = GetScreenHeight();
@@ -86,6 +87,7 @@ void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
         for(auto it = _promotionList.begin(); it != _promotionList.end(); it++)
             it->second->Draw(); 
     }
+    // Draw turn text
     if(player == PieceColor::W){
         int fontSize = 25;
         Color cian = {104,168,222,255};
@@ -96,8 +98,7 @@ void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
         int textWidth = MeasureText("BLACK TURN", fontSize);
         DrawText("BLACK TURN", GetScreenWidth() - textWidth - MARGIN_SIZE, (MARGIN_SIZE - fontSize)/2, fontSize, BLACK);
     }
-    
-
+    // Draw pause button
     DrawRectangleRounded(pauseButton, 0.1, 16, DARKGRAY);
     for(int i = 0; i < 2; i ++){
         Vector2 startPos = {pauseButton.x + 3 * PAUSEBUTTON_SIZE/10 + 2*i*PAUSEBUTTON_SIZE/5, pauseButton.y + 5};
@@ -107,6 +108,7 @@ void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
     }
 }
 
+// Method to draw checkmate message
 void UI::DrawCheckMate(PieceColor player, bool& drawMenu){
     int fontSize = 50;
     int textWidth = MeasureText("WHITE WINS", fontSize);
@@ -115,9 +117,11 @@ void UI::DrawCheckMate(PieceColor player, bool& drawMenu){
     int continueWidth = MeasureText("Click anywhere to continue!", 25);
     Color cian = {104,168,222,255};
     vector<vector<bool>> possibleMoves;
+    // Checkmate draw loop
     while(!WindowShouldClose()){
         ClearBackground(GRAY);
         BeginDrawing();
+        // Draw chessboard
         Draw(possibleMoves, player);
         if(player == PieceColor::W){
             DrawText("WHITE WINS", (windowWidth - textWidth)/2 , (windowHeight- fontSize)/2, fontSize, cian);
@@ -132,7 +136,7 @@ void UI::DrawCheckMate(PieceColor player, bool& drawMenu){
         EndDrawing();
     }
 }
-
+// Draw menu method
 bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
     std::vector<std::vector<bool>> moves;
     int screenWidth = GetScreenWidth();
@@ -144,9 +148,11 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
                             static_cast<float>(20 + newGameWidth), static_cast<float>(20 + NEWGAME_FONTSIZE)};
     bool isInsideOuterBox;
     bool isInsideNewgame;
+    // Menu Draw Loop
     while(!WindowShouldClose()){
+        // Draw chessboard
         Draw(moves, player);
-
+        // Draw Menu
         DrawRectangleRounded(outerBox, 0.1, 16, GRAY);
         DrawRectangleRoundedLines(outerBox, 0.1, 16, 5, BLACK);
         DrawRectangleRounded(newgameBox, 0.1, 16, BEIGE);
@@ -166,6 +172,12 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
         }
         EndDrawing();
     }
+    // If window was closed, throw exception
+    if(WindowShouldClose()){
+        EndDrawing();
+        throw std::runtime_error("Window closed while waiting for user input.");
+    }
+
     EndDrawing();
     if(isInsideNewgame){
         drawMenu = false;
@@ -178,22 +190,19 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
         drawMenu = false;
     return false;
 }
-
-
-void UI::Update(){
-}
-
+// Method to get position on chessboard clicked by user
 ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu){
     Rectangle pauseButton = {MARGIN_SIZE + 8*SQUARE_SIZE + (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2,
                             (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2, PAUSEBUTTON_SIZE, PAUSEBUTTON_SIZE};
-    while (!WindowShouldClose()){ // Loop bloqueante, mas não fecha a janela
+    // Loop to draw while waiting for user entry
+    while (!WindowShouldClose()){
         BeginDrawing();
         ClearBackground(GRAY);
-
+        // Draw chessboard and pieces
         Draw(possibleMoves, player);
 
-
-        if (IsMouseButtonPressed(0)){ // Verifica se houve clique
+        // If mouse button pressed, verifies if pos is valid
+        if (IsMouseButtonPressed(0)){
             Vector2 mousePos = GetMousePosition();
 
             if(CheckCollisionPointRec(mousePos, pauseButton)){
@@ -215,12 +224,12 @@ ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves, P
         EndDrawing();
     }
 
-    // Se a janela for fechada, lançamos uma exceção ou retornamos uma posição especial
+    // If window was closed, throw exception
     throw std::runtime_error("Window closed while waiting for user input.");
 }
 
 
-
+// Method to find piece on board
 PieceImage* UI::findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList){
     for (auto& piece : pieceList) {
         int pieceColumn = static_cast<int>((piece.second->getPosition().x - MARGIN_SIZE)  / SQUARE_SIZE);
@@ -233,7 +242,7 @@ PieceImage* UI::findPiece(const ChessPosition& position, std::vector<std::pair<i
     }
     return nullptr;
 }
-
+// Method to move pieces on board
 void UI::MovePiece(const ChessPosition& source, const ChessPosition& target, int isCastling) {
     PieceColor color;
     PieceImage* piece = findPiece(source, _blackPieceList);
@@ -243,9 +252,10 @@ void UI::MovePiece(const ChessPosition& source, const ChessPosition& target, int
         color = PieceColor::W;
     } else 
         color = PieceColor::B;
-
+    // If a piece was found in source
     if (piece) {
         piece->MoveTo({static_cast<float>(target.getColumn() - 'a'), static_cast<float>(8 - target.getRow())});
+        // if Is castling, we should move tower as well
         if(isCastling == 1){
             if(color == PieceColor::W){
                 tower = findPiece(ChessPosition('h', 1), _whitePieceList);
@@ -267,7 +277,7 @@ void UI::MovePiece(const ChessPosition& source, const ChessPosition& target, int
     }
 }
 
-
+// Method to remove Piece from a list
 void UI::removePieceFromList(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList, PieceColor color){
     for (auto it = pieceList.begin(); it != pieceList.end(); it++) {
         int pieceColumn = static_cast<int>((it->second->getPosition().x - MARGIN_SIZE)  / SQUARE_SIZE);
@@ -282,14 +292,14 @@ void UI::removePieceFromList(const ChessPosition& position, std::vector<std::pai
         }
     }
 }
-
+// Method to remove a piece from board
 void UI::removePiece(ChessPiece* capturedPiece) {
     PieceColor color = capturedPiece->getColor();
-    bool isWhite = color == PieceColor::W ? true : false;
+    bool isWhite = (color == PieceColor::W ? true : false);
     ChessPosition capturedPos = ChessPosition(capturedPiece->getPosition().getColumn() + 'a', 8 - capturedPiece->getPosition().getRow());
 
     std::cout << "removePiece(): " << static_cast<int>(color) <<" (" << capturedPos.getColumn() << ", " << capturedPos.getRow() << ")" << std::endl;
-
+    // Chooses list from correct color
     if (isWhite) {
         removePieceFromList(capturedPos, _whitePieceList, color);
     } else {
@@ -297,34 +307,38 @@ void UI::removePiece(ChessPiece* capturedPiece) {
     }
 }
 
-
+// Method to add piece to removed list
 void UI::addToRemovedList(int p, PieceColor color){
     PieceImage* piece;
     Vector2 pos;
+    // Verifies piece color
     if(color == PieceColor::W){
         pos.x = MARGIN_SIZE + (_whiteRemovedList.size() + 1) * 30;// 30 is image width
         pos.y = MARGIN_SIZE/2;
+
         piece = new PieceImage(p, color, pos, true);
         _whiteRemovedList.push_back(std::make_pair(p, piece));
     } else {
         pos.x = MARGIN_SIZE + (_blackRemovedList.size() + 1) * 30; // 30 is image width
         pos.y = MARGIN_SIZE + 8*SQUARE_SIZE;
+
         piece = new PieceImage(p, color, pos, true);
         _blackRemovedList.push_back(std::make_pair(p, piece));
     }
 }
-
+// Method to Draw Chessboard
 void UI::DrawChessBoard(std::vector<std::vector<bool>> possibleMoves) {
     const int boardSize = 8;
     const float squareSize = SQUARE_SIZE; // Size of each square in pixels
     const float marginSize = MARGIN_SIZE;  // Margin around the board in pixels
-
+    // Loop to draw board squares
     for (int x = 0; x < boardSize; x++) {
         for (int y = 0; y < boardSize; y++) {
             Color color = ((x + y) % 2 == 0) ? DARKGRAY : RAYWHITE;
             DrawRectangle(x * squareSize + marginSize, y * squareSize + marginSize, squareSize, squareSize, color);
         }
     }
+    // Loop to draw possibleMoves highlight
     if(not possibleMoves.empty()){
         for (int x = 0; x < boardSize; x++) {
             for (int y = 0; y < boardSize; y++) {
@@ -336,7 +350,7 @@ void UI::DrawChessBoard(std::vector<std::vector<bool>> possibleMoves) {
         }
     }
 }
-
+// Method to fill promotion list in case we have to draw it
 void UI::fillPromotionList(PieceColor color){
     int width = GetScreenWidth();
     int height = GetScreenHeight();
@@ -345,24 +359,25 @@ void UI::fillPromotionList(PieceColor color){
     addPiece(_promotionList, BISHOP, color, width/2 + 10, height/2 - 90, 2);
     addPiece(_promotionList, QUEEN, color, width/2 + 150, height/2 - 90, 2);
 }
-
+// Method to get promotion piece users choice
 std::string UI::selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
-    while (!WindowShouldClose()){ // Loop bloqueante, mas não fecha a janela
+    // Method loop
+    while (!WindowShouldClose()){
         BeginDrawing();
         ClearBackground(GRAY);
-
+        // Draw chessboard and pieces
         this->Draw(possibleMoves, player);
 
         EndDrawing();
-
-        if (IsMouseButtonPressed(0)){ // Verifica se houve clique
+        // Verifies Users mouse button click
+        if (IsMouseButtonPressed(0)){ 
             int width = GetScreenWidth();
             int height = GetScreenHeight();
             Vector2 mousePos = GetMousePosition();
             std::cout << "mousePos: (" << mousePos.x << ", " << mousePos.y << ")" <<std::endl;
             int column = static_cast<int>((mousePos.x - (width/2 - 270))/135);
             int row = static_cast<int>((mousePos.y -(height/2 - 90))/200);
-
+            // Return chosen piece
             if(column >= 0 && column < 4 && row == 0){
                 if(column == 0)
                     return std::string("R");
@@ -378,21 +393,22 @@ std::string UI::selectPromotionPiece(std::vector<std::vector<bool>> possibleMove
         }
     }
 
-    // Se a janela for fechada, lançamos uma exceção ou retornamos uma posição especial
+    // If window was closed, throw exception
     throw std::runtime_error("Window closed while waiting for user input.");
 }
-
+// Method to replace promoted piece
 void UI::replacePromotedPiece(ChessPosition pos, PieceColor color, Pieces type){
+    // Verifies piece color, remove from piece list, then add new piece to list
     if (color == PieceColor::W) {
         removePieceFromList(pos, _whitePieceList, color);
         Vector2 boardPos = {MARGIN_SIZE + (pos.getColumn()- 'a') * SQUARE_SIZE, MARGIN_SIZE + (8 - pos.getRow())*SQUARE_SIZE};
         addPiece(_whitePieceList, type, color, boardPos.x, boardPos.y);
-
     } else {
         removePieceFromList(pos, _blackPieceList, color);
         Vector2 boardPos = {MARGIN_SIZE + (pos.getColumn()- 'a') * SQUARE_SIZE, MARGIN_SIZE + (8 - pos.getRow())*SQUARE_SIZE};
-        addPiece(_whitePieceList, type, color, boardPos.x, boardPos.y);
+        addPiece(_blackPieceList, type, color, boardPos.x, boardPos.y);
     }
+    // Remove promotion list elements and textures
     for(auto it = _promotionList.begin(); it != _promotionList.end(); it++)
         delete it->second;
     _promotionList.clear();
@@ -418,6 +434,7 @@ Pieces UI::toPieces(char piece){
 PieceImage::PieceImage(int piece, PieceColor color, Vector2 pos, int format){
     bool white = color == PieceColor::W;
     Image img;
+    // Switch case to select correct image based on color and piece
     switch (piece){
         case PAWN:{
             if(white)
@@ -459,6 +476,7 @@ PieceImage::PieceImage(int piece, PieceColor color, Vector2 pos, int format){
             img = LoadImage("../Images/Pawn.png"); 
         }break;
     }
+    // Choose format based on if it is in play, if it is a promotion piece or if it is a removed list
     if(format == 0){
         ImageResize(&img, 60, 100);
         image = LoadTextureFromImage(img);
@@ -478,24 +496,24 @@ PieceImage::PieceImage(int piece, PieceColor color, Vector2 pos, int format){
     }
     
 }
-
+// Destructor
 PieceImage::~PieceImage(){
     // UnloadTexture(image);
 }
-
+// Draw method
 void PieceImage::Draw(){
     DrawTextureV(image, position, WHITE);
     // DrawTextureEx(image, position, 0, 0.4, WHITE);
 }
 
-
+// Method to get piece position on board
 Vector2 PieceImage::getPosition(){
     Vector2 pos;
     pos.x = position.x;
     pos.y = position.y;
     return pos;
 }
-
+// Method to move PieceImage on board
 void PieceImage::MoveTo(Vector2 targetPos){
     position.x = MARGIN_SIZE + targetPos.x*SQUARE_SIZE + (SQUARE_SIZE - image.width)/2;
     position.y = MARGIN_SIZE+ targetPos.y*SQUARE_SIZE;

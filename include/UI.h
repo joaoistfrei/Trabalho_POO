@@ -43,7 +43,6 @@ class UI{
         void Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player);
         void DrawCheckMate(PieceColor player, bool& drawMenu);
         bool DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player);
-        void Update();
         ChessPosition SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu);
         void MovePiece(const ChessPosition& source, const ChessPosition& target, int isCastling);
         PieceImage* findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList);
