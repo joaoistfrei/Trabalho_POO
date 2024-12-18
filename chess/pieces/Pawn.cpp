@@ -20,7 +20,7 @@ std::vector<std::vector<bool>> Pawn::possibleMoves() const {
             mat[p.getRow()][p.getColumn()] = true;
         }
         Position p2(position.getRow() - 2, position.getColumn());
-        if (getBoard()->positionExists(p2) && !getBoard()->thereIsAPiece(p2) && getMoveCount() == 0) {
+        if (getBoard()->positionExists(p2) && !getBoard()->thereIsAPiece(p2) && !getBoard()->thereIsAPiece(p) && getMoveCount() == 0) {
             mat[p2.getRow()][p2.getColumn()] = true;
         }
         p.setValues(position.getRow() - 1, position.getColumn() - 1);
@@ -49,7 +49,7 @@ std::vector<std::vector<bool>> Pawn::possibleMoves() const {
             mat[p.getRow()][p.getColumn()] = true;
         }
         Position p2(position.getRow() + 2, position.getColumn());
-        if (getBoard()->positionExists(p2) && !getBoard()->thereIsAPiece(p2) && getMoveCount() == 0) {
+        if (getBoard()->positionExists(p2) && !getBoard()->thereIsAPiece(p2) && !getBoard()->thereIsAPiece(p) && getMoveCount() == 0) {
             mat[p2.getRow()][p2.getColumn()] = true;
         }
         p.setValues(position.getRow() + 1, position.getColumn() - 1);

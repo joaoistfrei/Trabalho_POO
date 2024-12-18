@@ -118,7 +118,7 @@ ChessPiece* ChessMatch::performChessMove(const ChessPosition& fromPosition, cons
     } 
     // se for o caso, coloca o peao como vulneravel ao en passant
     if (dynamic_cast<Pawn*>(movedPiece) && (to.getRow() == from.getRow() + 2 || to.getRow() == from.getRow() - 2)) {
-        enPassantVulnerable = movedPiece;
+            enPassantVulnerable = movedPiece;
     } else {
         enPassantVulnerable = nullptr;
     }
