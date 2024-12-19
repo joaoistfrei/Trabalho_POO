@@ -193,7 +193,20 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player,  b
                 if(isInsideNewgame)
                     DrawRectangleRoundedLines(newgameBox, 0.1, 16, 5, BLACK);
             }
-            break;
+            if(isInsideNewgame){
+                drawMenu = false;
+                EndDrawing();
+                return true;
+            }
+            if(isInsideOuterBox){
+                EndDrawing();
+                continue;
+            } 
+            if(isGameBeingPlayed){
+                drawMenu = false;
+                EndDrawing();
+                return false;
+            } 
         }
         EndDrawing();
     }
@@ -202,17 +215,6 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player,  b
         EndDrawing();
         throw std::runtime_error("Window closed while waiting for user input.");
     }
-
-    EndDrawing();
-    if(isInsideNewgame){
-        drawMenu = false;
-        return true;
-    }
-    if(isInsideOuterBox){
-        return false;
-    } 
-    if(isGameBeingPlayed)
-        drawMenu = false;
     return false;
 }
 // Method to get position on chessboard clicked by user
