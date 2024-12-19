@@ -30,6 +30,7 @@ using namespace std;
     
         bool drawMenu = true;
         bool isGameBeingPlayed = false;
+        bool check = false;
 
         PieceColor player = PieceColor::W;
         InitWindow(windowWidth, windowHeight, "BetterChess BETA");
@@ -42,11 +43,11 @@ using namespace std;
             ClearBackground(GRAY);
             BeginDrawing();
             // Game draw
-            ui->Draw(possibleMoves, player);
+            ui->Draw(possibleMoves, player, check);
             EndDrawing();
             // If there is a game and is checkmate, draw checkmate message
             if(chessMatch && chessMatch->getCheckMate()){
-                ui->DrawCheckMate(player, drawMenu);
+                ui->DrawCheckMate(player, drawMenu, check);
                 if(WindowShouldClose())
                     break;
             }
@@ -56,7 +57,7 @@ using namespace std;
             try {
                 // Draw menu and reset game if necessary
                 if(drawMenu){
-                bool startNewGame = ui->DrawMenu(isGameBeingPlayed, drawMenu, player);
+                bool startNewGame = ui->DrawMenu(isGameBeingPlayed, drawMenu, player, check);
                 
                 if(startNewGame){
                     if(chessMatch != nullptr)
@@ -69,15 +70,17 @@ using namespace std;
                     }
                     continue;
                 }
+                // Update check
+                check = chessMatch->getCheck();
                 // Get player's turn
                 player = chessMatch->getCurrentPlayer();
                 // Get position from UI
-                ChessPosition source = ui->SelectPosition(possibleMoves, player, drawMenu);
+                ChessPosition source = ui->SelectPosition(possibleMoves, player, drawMenu, check);
                 cout << source.toString() << endl;
                 // Get piece possible moves
                 possibleMoves = chessMatch->possibleMoves(source);
                 // Get target movement position from UI
-                ChessPosition target = ui->SelectPosition(possibleMoves, player, drawMenu);
+                ChessPosition target = ui->SelectPosition(possibleMoves, player, drawMenu, check);
                 // Perform chosen move and get capturedPiece
                 ChessPiece* capturedPiece = chessMatch->performChessMove(source, target);
                 // Move piece on UI
@@ -90,7 +93,7 @@ using namespace std;
                 if (chessMatch->getPromoted() != nullptr) {
                     ChessPiece* promoPiece = chessMatch->getPromoted();
                     ui->fillPromotionList(promoPiece->getColor());
-                    string promotionType = ui->selectPromotionPiece(possibleMoves, player);
+                    string promotionType = ui->selectPromotionPiece(possibleMoves, player, check);
                     chessMatch->replacePromotedPiece(promotionType);
                     ui->replacePromotedPiece(promoPiece->getChessPosition(), promoPiece->getColor(), ui->toPieces(promotionType[0]));
                 }

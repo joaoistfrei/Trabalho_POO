@@ -65,11 +65,35 @@ UI::~UI(){
         delete pieces.second;
 }
 // Draw method
-void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
+void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool isCheck){
     Rectangle pauseButton = {MARGIN_SIZE + 8*SQUARE_SIZE + (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2,
                              (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2, PAUSEBUTTON_SIZE, PAUSEBUTTON_SIZE};
     // Draw chessboard and pieces on list
     DrawChessBoard(possibleMoves);
+    if(isCheck){
+        std::vector<std::pair<int, PieceImage*>>::iterator it;
+        if(player == PieceColor::W){
+            it = _whitePieceList.begin();
+            for(; it != _whitePieceList.end(); it++){
+                if(it->first == KING)
+                    break;
+            }
+            if(it == _whitePieceList.end())
+                throw ChessException("Is check but there is no King!");
+        } else {
+            it = _blackPieceList.begin();
+            for(; it != _blackPieceList.end(); it++){
+                if(it->first == KING)
+                    break;
+            }
+            if(it == _blackPieceList.end())
+                throw ChessException("Is check but there is no King!");
+        }
+        Vector2 kingPos = it->second->getPosition();
+        Rectangle square = {kingPos.x - static_cast<int>(kingPos.x)%100, kingPos.y, SQUARE_SIZE, SQUARE_SIZE};
+        DrawRectangleRec(square, RED);
+    }
+
     for(auto it = _blackPieceList.begin(); it != _blackPieceList.end(); it++)
         it->second->Draw();
     for(auto it = _whitePieceList.begin(); it != _whitePieceList.end(); it++)
@@ -106,10 +130,11 @@ void UI::Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
 
         DrawLineEx(startPos, endPos, pauseButton.width/5, WHITE);
     }
+
 }
 
 // Method to draw checkmate message
-void UI::DrawCheckMate(PieceColor player, bool& drawMenu){
+void UI::DrawCheckMate(PieceColor player, bool& drawMenu, bool isCheck){
     int fontSize = 50;
     int textWidth = MeasureText("WHITE WINS", fontSize);
     int windowWidth = GetScreenWidth();
@@ -122,7 +147,7 @@ void UI::DrawCheckMate(PieceColor player, bool& drawMenu){
         ClearBackground(GRAY);
         BeginDrawing();
         // Draw chessboard
-        Draw(possibleMoves, player);
+        Draw(possibleMoves, player, isCheck);
         if(player == PieceColor::W){
             DrawText("WHITE WINS", (windowWidth - textWidth)/2 , (windowHeight- fontSize)/2, fontSize, cian);
         } else
@@ -137,7 +162,7 @@ void UI::DrawCheckMate(PieceColor player, bool& drawMenu){
     }
 }
 // Draw menu method
-bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
+bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player,  bool isCheck){
     std::vector<std::vector<bool>> moves;
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
@@ -151,7 +176,7 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
     // Menu Draw Loop
     while(!WindowShouldClose()){
         // Draw chessboard
-        Draw(moves, player);
+        Draw(moves, player, isCheck);
         // Draw Menu
         DrawRectangleRounded(outerBox, 0.1, 16, GRAY);
         DrawRectangleRoundedLines(outerBox, 0.1, 16, 5, BLACK);
@@ -191,7 +216,7 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
     return false;
 }
 // Method to get position on chessboard clicked by user
-ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu){
+ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu, bool isCheck){
     Rectangle pauseButton = {MARGIN_SIZE + 8*SQUARE_SIZE + (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2,
                             (MARGIN_SIZE - PAUSEBUTTON_SIZE)/2, PAUSEBUTTON_SIZE, PAUSEBUTTON_SIZE};
     // Loop to draw while waiting for user entry
@@ -199,7 +224,7 @@ ChessPosition UI::SelectPosition(std::vector<std::vector<bool>> possibleMoves, P
         BeginDrawing();
         ClearBackground(GRAY);
         // Draw chessboard and pieces
-        Draw(possibleMoves, player);
+        Draw(possibleMoves, player, isCheck);
 
         // If mouse button pressed, verifies if pos is valid
         if (IsMouseButtonPressed(0)){
@@ -364,13 +389,13 @@ void UI::fillPromotionList(PieceColor color){
     addPiece(_promotionList, QUEEN, color, width/2 + 150, height/2 - 90, 2);
 }
 // Method to get promotion piece users choice
-std::string UI::selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves, PieceColor player){
+std::string UI::selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool isCheck){
     // Method loop
     while (!WindowShouldClose()){
         BeginDrawing();
         ClearBackground(GRAY);
         // Draw chessboard and pieces
-        this->Draw(possibleMoves, player);
+        this->Draw(possibleMoves, player, isCheck);
 
         EndDrawing();
         // Verifies Users mouse button click

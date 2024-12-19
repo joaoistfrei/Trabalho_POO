@@ -40,10 +40,10 @@ class UI{
         UI();
         ~UI();
         void addPiece(std::vector<std::pair<int, PieceImage*>>& pieceList, Pieces type, PieceColor color, float x, float y, int format = 0);
-        void Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player);
-        void DrawCheckMate(PieceColor player, bool& drawMenu);
-        bool DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player);
-        ChessPosition SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu);
+        void Draw(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool isCheck);
+        void DrawCheckMate(PieceColor player, bool& drawMenu,  bool isCheck);
+        bool DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player, bool isCheck);
+        ChessPosition SelectPosition(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool& drawMenu, bool isCheck);
         void MovePiece(const ChessPosition& source, const ChessPosition& target, int isCastling);
         PieceImage* findPiece(const ChessPosition& position, std::vector<std::pair<int, PieceImage*>>& pieceList);
         int PieceMouseSelect(Vector2 mousePos);
@@ -53,7 +53,7 @@ class UI{
         void addToRemovedList(int p, PieceColor color);
 
         void fillPromotionList(PieceColor color);
-        std::string selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves, PieceColor player);
+        std::string selectPromotionPiece(std::vector<std::vector<bool>> possibleMoves, PieceColor player, bool isCheck);
         void replacePromotedPiece(ChessPosition pos, PieceColor color, Pieces type);
         Pieces toPieces(char piece);
 
