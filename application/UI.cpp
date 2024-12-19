@@ -154,7 +154,7 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
         Draw(moves, player);
         // Draw Menu
         DrawRectangleRounded(outerBox, 0.1, 16, GRAY);
-        DrawRectangleRoundedLines(outerBox, 0.1, 16, BLACK);
+        DrawRectangleRoundedLines(outerBox, 0.1, 16, 5, BLACK);
         DrawRectangleRounded(newgameBox, 0.1, 16, BEIGE);
         
         DrawText("CHESS", (screenWidth - textWidth)/2, (screenHeight - outerBox.y + 100)/2, 100, BLACK);
@@ -166,7 +166,7 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
             if(isInsideOuterBox){
                 isInsideNewgame = CheckCollisionPointRec(mousePos, newgameBox);
                 if(isInsideNewgame)
-                    DrawRectangleRoundedLines(newgameBox, 0.1, 16, BLACK);
+                    DrawRectangleRoundedLines(newgameBox, 0.1, 16, 5, BLACK);
             }
             break;
         }
