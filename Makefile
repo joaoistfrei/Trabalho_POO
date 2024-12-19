@@ -1,7 +1,7 @@
 # compilador e as flags relevantes
 CXX = g++
-CXXFLAGS = -Iinclude -c -std=c++14 -Wall -Wextra -g 
-LDFLAGS = -lraylib -fPIE
+CXXFLAGS = -Iinclude -c -std=c++14 -Wall -Wextra -g -fPIE
+LDFLAGS = -pie -lraylib
 
 # diretorios com os arquivos-fonte
 SRC_DIRS = boardgame chess chess/pieces application

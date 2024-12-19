@@ -154,7 +154,7 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
         Draw(moves, player);
         // Draw Menu
         DrawRectangleRounded(outerBox, 0.1, 16, GRAY);
-        DrawRectangleRoundedLines(outerBox, 0.1, 16, 5, BLACK);
+        DrawRectangleRoundedLines(outerBox, 0.1, 16, BLACK);
         DrawRectangleRounded(newgameBox, 0.1, 16, BEIGE);
         
         DrawText("CHESS", (screenWidth - textWidth)/2, (screenHeight - outerBox.y + 100)/2, 100, BLACK);
@@ -166,7 +166,7 @@ bool UI::DrawMenu(bool& isGameBeingPlayed, bool& drawMenu, PieceColor player){
             if(isInsideOuterBox){
                 isInsideNewgame = CheckCollisionPointRec(mousePos, newgameBox);
                 if(isInsideNewgame)
-                    DrawRectangleRoundedLines(newgameBox, 0.1, 16, 2, BLACK);
+                    DrawRectangleRoundedLines(newgameBox, 0.1, 16, BLACK);
             }
             break;
         }
@@ -296,12 +296,13 @@ void UI::removePieceFromList(const ChessPosition& position, std::vector<std::pai
 void UI::removePiece(ChessPiece* capturedPiece, bool enPassantCompleted, ChessPosition target) {
     PieceColor color = capturedPiece->getColor();
     bool isWhite = (color == PieceColor::W ? true : false);
-    ChessPosition capturedPos = ChessPosition(capturedPiece->getPosition().getColumn() + 'a', 8 - capturedPiece->getPosition().getRow());
+    ChessPosition capturedPos = ChessPosition('a', 1);
 
     std::cout << "removePiece(): " << static_cast<int>(color) <<" (" << capturedPos.getColumn() << ", " << capturedPos.getRow() << ")" << std::endl;
     if(enPassantCompleted && not capturedPiece->getBoard()->positionExists(capturedPiece->getPosition())){
-        capturedPos =  ChessPosition(target.getColumn(), target.getRow() + (capturedPiece->getColor() == PieceColor::W ? -1 : 1));
-    }
+        capturedPos =  ChessPosition(target.getColumn(), target.getRow() + (capturedPiece->getColor() == PieceColor::W ? 1 : -1));
+    } else 
+        capturedPos = ChessPosition(capturedPiece->getPosition().getColumn() + 'a', 8 - capturedPiece->getPosition().getRow());
     // Chooses list from correct color
     if (isWhite) {
         removePieceFromList(capturedPos, _whitePieceList, color);
